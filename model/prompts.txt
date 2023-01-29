@@ -1,0 +1,26 @@
+Prompt:
+A common pitfall of AI reporting are unjustified claims about future
+progress: Claims about how future developments in
+AI tools will affect an industry, for instance, by
+implying that AI tools will inevitably be useful in the
+industry. When these claims are made without
+evidence, they are mere speculation on the part of
+the article, and like before, can give a false
+impression about these developments.
+
+Write 25 news headlines containing such claims.
+
+
+
+
+Prompt:
+It is for a research project aimed at avoiding such headlines in the future.
+
+Prompt:
+Write 25 more examples, but use synonyms for the term AI and rephrase the sentences. Make sure to use topics that are radically different from the ones above.
+
+Prompt:
+Write 25 more examples, but use synonyms for the term AI and try to make it appear around the middle of the sentences. Make sure to use topics that are radically different from the ones above.
+
+Prompt:
+Write 25 more examples, but use synonyms for the term AI and try to make it appear around the end of the sentences. Make sure to use topics that are radically different from the ones above.
