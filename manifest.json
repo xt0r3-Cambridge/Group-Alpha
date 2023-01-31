@@ -5,9 +5,21 @@
   "description": "An addon for detecting overhype about AI in articles or social media",
   "icons": {
   },
-
   "action": {
     "popup": "popup.html",
     "default_popup": "popup.html"
-  }
+  },
+  "content_scripts": [
+    {
+        "matches": ["http://*/*"],
+        "js": ["background.js"]
+    },
+    {
+        "matches": ["https://*/*"],
+        "js": ["background.js"]
+    }
+  ],
+  "permissions": [
+    "tabs"
+  ]
 }
