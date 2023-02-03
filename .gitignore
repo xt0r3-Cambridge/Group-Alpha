@@ -270,3 +270,5 @@ tags
 # DS_Store (MacOS)
 .DS_Store
 
+# Ignore model data
+**/test_trainer
