@@ -71,7 +71,7 @@ def scraping_from_techreview(url):
     driver.get(url)
 
     driver.find_element(By.ID, 'content-list__load-more-btn').click()
-    sleep(0.2)
+    sleep(2)
 
     html = urlopen(url).read()
     soup = BeautifulSoup(html, features="html.parser")
@@ -79,6 +79,8 @@ def scraping_from_techreview(url):
     a_tags = soup.find_all("a", {"class": ""})
     for a in a_tags:
         href.append(a.get("href"))
+
+    print(href)  # TODO: remove in production, only left in for testing
 
     return 0
 
@@ -118,4 +120,3 @@ objective_article_urls = ["https://www.technologyreview.com/2022/04/22/1050394/a
                 "https://www.technologyreview.com/2022/12/19/1065596/how-to-spot-ai-generated-text/",
                 "https://www.technologyreview.com/2022/12/16/1065247/artists-can-now-opt-out-of-the-next-version-of-stable-diffusion/"]
 '''
-scraping_from_techreview("https://www.technologyreview.com/2022/12/19/1065596/how-to-spot-ai-generated-text/")
