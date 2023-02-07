@@ -272,3 +272,4 @@ tags
 
 # Ignore model data
 **/test_trainer
+**/bert-finetuned-multi-label-ai-hype
