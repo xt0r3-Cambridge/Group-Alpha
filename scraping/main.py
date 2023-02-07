@@ -1,7 +1,9 @@
+from time import sleep
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
-import requests
 import nltk
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 
 
 def scraping(url):
@@ -62,6 +64,29 @@ def scraping_more(urls):
     return res
 
 
+def scraping_from_techreview(url):
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.implicitly_wait(26)
+    driver.get(url)
+
+    driver.find_element(By.ID, 'content-list__load-more-btn').click()
+    sleep(0.2)
+
+    html = urlopen(url).read()
+    soup = BeautifulSoup(html, features="html.parser")
+    href = []
+    a_tags = soup.find_all("a", {"class": ""})
+    for a in a_tags:
+        href.append(a.get("href"))
+
+    return 0
+
+
+scraping_from_techreview("https://www.technologyreview.com/author/karen-hao/")
+
+
+'''
 objective_article_urls = ["https://www.technologyreview.com/2022/04/22/1050394/artificial-intelligence-for-the-people/",
                 "https://www.technologyreview.com/2022/04/21/1050381/the-gig-workers-fighting-back-against-the-algorithms/",
                 "https://www.technologyreview.com/2022/04/20/1050392/ai-industry-appen-scale-data-labels/",
@@ -92,5 +117,5 @@ objective_article_urls = ["https://www.technologyreview.com/2022/04/22/1050394/a
                 "https://www.technologyreview.com/2022/12/20/1065667/how-ai-generated-text-is-poisoning-the-internet/",
                 "https://www.technologyreview.com/2022/12/19/1065596/how-to-spot-ai-generated-text/",
                 "https://www.technologyreview.com/2022/12/16/1065247/artists-can-now-opt-out-of-the-next-version-of-stable-diffusion/"]
-
-print(scraping_more(objective_article_urls))
+'''
+scraping_from_techreview("https://www.technologyreview.com/2022/12/19/1065596/how-to-spot-ai-generated-text/")
