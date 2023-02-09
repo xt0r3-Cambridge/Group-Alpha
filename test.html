@@ -1,0 +1,98 @@
+<html>
+    <head>
+        <title>Example</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <div id='plugin'>
+            <button id='button1'>close</button>
+            <div id ='overlay'>
+                <div id='text'>nothing to report!</div>
+            </div>
+        </div>
+        <br/>
+        <button id='button2'>switch models</button>
+        <div id='model_selection' hidden='true'>
+            <input type="radio" id="keyword" name="model type" value="keyword">
+                <label for="keyword">Keyword Model</label><br>
+            <input type="radio" id="ai" name="model type" value="ai">
+                <label for="ai">AI Model</label><br>
+        </div>
+        
+    </body>
+    <script type='text/javascript'>
+    var problematic = false
+    var model = 0
+    var baseline_arr = [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    var complex_arr = [0.8,0.71,0,0,0,0,0,0,0,0,0,0,0,0,0.4,0.72,0,0]
+    var threshold =0.700
+    
+    const links = [
+        "<p>This article appears to be attributing agency to AI, describing AI systems as taking actions independent of human supervision or implying that they may soon be able to do so. <a href='https://www.aimyths.org/ai-has-agency'>See why this is a problematic metaphor.</a></p>",
+        "<p>This article appears to be using suggestive imagery to portray AI as humanoid robots. This gives readers a false impression that AI tools are embodied, even when it is just software that learns patterns from data. <a href='https://betterimagesofai.org/'>Read more here.</a></p>",
+        "<p>This article appears to be comparing AI with human intelligence, implying that AI algorithms learn in the same way as humans do. Such comparisons can lend credence to claims that AI is 'sentient'. <a href='https://thenextweb.com/news/human-intelligence-and-ai-are-vastly-different-so-lets-stop-comparing-them'>See why this is problematic.</a></p>",
+        "<p>This article appears to be comparing AI capabilities with human skills. This falsely implies that AI tools and humans compete on an equal footing — hiding the fact that AI tools only work in a narrow range of settings. <a href=''>help</a></p>",
+        "<p>This article appears to be hyperbolic. Describing AI systems as revolutionary or groundbreaking without concrete evidence of their performance gives a false impression of how useful they will be in a given setting. <a href='https://www.aimyths.org/ai-can-solve-any-problem'>Read more about the types of problems AI can actually solve, and its limitations, here.</a></p>",
+        "<p>This article appears to be comparing AI tools with major historical transformations like the invention of electricity or the industrial revolution. This can convey a false sense of potential and progress when not backed by real-world evidence. <a href='https://hdsr.mitpress.mit.edu/pub/wot7mkc1/release/9'>Read more here.</a></p>",
+        "<p>This article appears to be making unjustified claims about the future progress of AI. Without evidence, these claims are mere speculation, and can give a false impression about the state of AI developments. <a href='https://www.fhi.ox.ac.uk/wp-content/uploads/FAIC.pdf'>Read more here.</a></p>",
+        "<p>This article appears to be making false claims about AI, that spreads misinformation and encourages speculation. <a href='https://www.fast.ai/posts/2017-09-19-accurate-info.html'>Find credible sources here.</a></p>",
+        "<p>This article appears to be using sensational terms to describe banal actions. This hides an understanding of how mundane the tasks are, and that AI tools are functioning exactly as expected. Read more <a href='https://medium.com/@emilymenonbender/on-nyt-magazine-on-ai-resist-the-urge-to-be-impressed-3d92fd9a0edd'>here</a> and <a href='https://twitter.com/emilymbender/status/1571911804561035264?s=20&t=sEPBTiN2bd7qbeKJugjGIA'>here</a>.</p>",
+        "<p>This article appears to be treating key stakeholders as neutral parties. The article contains mainly quotes from people who have a key interest in the success of AI, and may hence be a biased perspective.<a href='https://amp.theguardian.com/commentisfree/2019/jan/13/dont-believe-the-hype-media-are-selling-us-an-ai-fantasy'>See why this is problematic.</a></p>",
+        "<p>This article appears to be repeating pr statements, rather than actually describing the AI tool, which can lead to misleading wording that misrepresents the actual capabilities of a tool. <a href='https://theclick.news/churnalists-at-large/'>See why this is problematic. </a></p>",
+        "<p>This article does not appear to discuss the limitations of AI tools. This could result in a skewed view about the risks of AI. Read more about <a href='https://hackernoon.com/the-missing-pieces-6-limitations-of-ai-s85r3upr'>the limitations of AI</a> and <a href='https://www.aimyths.org/ai-can-solve-any-problem'>why it can't solve any problem</a>.</p>",
+        "<p>This article appears to be downplaying to limitations of AI. This could result in a skewed view about the risks of AI. Read more about <a href='https://hackernoon.com/the-missing-pieces-6-limitations-of-ai-s85r3upr'>the limitations of AI</a> and <a href='https://www.aimyths.org/ai-can-solve-any-problem'>why it can't solve any problem</a>.</p>",
+        "<p>This article appears to be addressing the limitations of AI is a 'skeptics' framing. See why <a href='https://www.brookings.edu/research/a-guide-to-healthy-skepticism-of-artificial-intelligence-and-coronavirus/'>healthy skepticism about AI is good</a> and <a href='https://medium.com/@emilymenonbender/on-nyt-magazine-on-ai-resist-the-urge-to-be-impressed-3d92fd9a0edd#:~:text=On%20being%20placed%20into%20the%20%E2%80%9Cskeptics%E2%80%9D%20box'>why this skeptic framing is problematic</a>.</p>",
+        "<p>This article appears to be downplaying the human labour necessary to build AI systems.<a href='https://www.noemamag.com/the-exploited-labor-behind-artificial-intelligence/'> See why this is problematic.</a></p>",
+        "<p>This article appears to be reporting performance numbers without uncertainty estimations or caveats. There is seldom enough space in a news article to explain how performance numbers like accuracy are calculated, possibly misinforming readers, especially because AI tools are known to suffer performance degradations even under slight changes to the datasets they are evaluated on. <a href='https://points.datasociety.net/uncertainty-edd5caf8981b'>Read more about AI uncertainty here.</a></p>",
+        "<p>This article appears to describe AI as black boxes. This shifts accountability for AI tools from developers to the underlying technology, and ignores a lot of research on model interpretability and explainability. Read more on the fallacy of inscrutability <a href='https://royalsocietypublishing.org/doi/epdf/10.1098/rsta.2018.0084'>here</a>.</p>"
+    ]
+
+    function getProblematicArr() {
+        return model == 0 ? baseline_arr : complex_arr.map(function (a,i){
+            return a>threshold ? 1 : 0})
+    }
+
+    function loadOverlay() {
+        var arr = getProblematicArr();
+        if((arr.reduce((x,a) => x+a,0)) > 0){
+            problematic=true
+        } else {
+            problematic = false
+        }
+
+        if(problematic){
+            var filtered = links.filter((e,i) => arr[i]>0)
+            $('#text').html(filtered.reduce(((x,a) => a + "</break></break>" + x), ""))
+        } else {
+            console.log("here")
+            $('#text').html("<p>nothing to report!</p>")
+        }
+    }
+    
+
+    $(function() {
+        loadOverlay()
+
+        model == 0 ? $('#keyword').prop('checked', true) : $('#ai').prop('checked', true)
+
+        $('#button1').on('click', function(e) {
+            $('#button1').text($('#button1').text() == 'close' ? 'open' : 'close')
+            $('#overlay').toggle()
+        }) 
+        
+        $('#button2').on('click', function (e) {
+            $('#model_selection').toggle()
+        })
+
+        $('#keyword').on('click', function (e) {
+            model = 0
+            loadOverlay()
+        })
+
+        $('#ai').on('click', function (e) {
+            model = 1
+            loadOverlay()
+        })
+    })
+    </script>
+</html>
