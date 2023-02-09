@@ -4,7 +4,16 @@ from bs4 import BeautifulSoup
 import nltk
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+import json
+from argparse import ArgumentParser
 
+
+# Parsing functionality for command line arguments
+parser = ArgumentParser()
+parser.add_argument("-f", "--file", dest="filename",
+                    help="write scraped data to FILE in JSON format", metavar="FILE", required=False)
+
+args = parser.parse_args()
 
 def scraping(url):
     """Scraping text from articles.
@@ -76,19 +85,28 @@ def scraping_urls_from_technology_review(url):
     while 1:
         try:
             driver.find_element(By.ID, 'content-list__load-more-btn').click()
+            print("Loading news...")
             sleep(0.5)
         except:
+            print("Loaded all news")
+            
             urls = []
             headings = []
             h3s = driver.find_elements(By.CLASS_NAME, "teaserItem__title--32O7a")
+            
+            print("Extracting headlines...")
+            
             for x in h3s:
                 urls.append(x.find_element(By.TAG_NAME, "a").get_attribute("href"))
                 headings.append(x.text)
+                
+            print("Extracting text... This may take a while")
 
             articles = []
             for i in range(len(urls)):
                 articles.append(scraping_text_from_technology_review(urls[i]))
                 articles[i]['main_heading'] = headings[i]
+                
             return articles
 
 
@@ -102,4 +120,9 @@ The return format:
       ...]
 '''
 
-results = scraping_urls_from_technology_review("https://www.technologyreview.com/author/karen-hao/")
+# results = scraping_urls_from_technology_review("https://www.technologyreview.com/author/karen-hao/")
+results = scraping_urls_from_technology_review("https://www.technologyreview.com/author/melissa-heikkila/")
+
+if args.filename:
+    with open(args.filename, "w") as f:
+        json.dump(results, f)
