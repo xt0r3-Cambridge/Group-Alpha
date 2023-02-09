@@ -12,11 +12,11 @@
   "content_scripts": [
     {
         "matches": ["http://*/*"],
-        "js": ["background.js"]
+        "js": ["main.js"]
     },
     {
         "matches": ["https://*/*"],
-        "js": ["background.js"]
+        "js": ["main.js"]
     }
   ],
   "permissions": [
