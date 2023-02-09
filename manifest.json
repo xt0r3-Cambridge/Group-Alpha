@@ -19,6 +19,16 @@
         "js": ["main.js"]
     }
   ],
+  "web_accessible_resources": [
+    {
+      "matches": ["http://*/*"],
+      "resources": ["other.js"]
+    },
+    {
+      "matches": ["https://*/*"],
+      "resources": ["other.js"]
+    }
+  ],
   "permissions": [
     "tabs"
   ]
