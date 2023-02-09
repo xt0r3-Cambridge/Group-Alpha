@@ -7,13 +7,28 @@ from selenium.webdriver.common.by import By
 import json
 from argparse import ArgumentParser
 
+# Example URLs:
+# https://www.technologyreview.com/author/melissa-heikkila/
+# https://www.technologyreview.com/author/niall-firth/
 
 # Parsing functionality for command line arguments
 parser = ArgumentParser()
 parser.add_argument("-f", "--file", dest="filename",
                     help="write scraped data to FILE in JSON format", metavar="FILE", required=False)
+parser.add_argument("-u", "--urls", dest="urls",
+                    help="The URLs you want to scrape the data from. At the moment, only technologyreview.com is supported.",
+                    metavar="url_1,url_2,...,url_n", required=True)
+parser.add_argument("-v", "--verbose", dest="verbose",
+                    help="Provide additional logging information", action='store_true')
 
 args = parser.parse_args()
+urls = [line.strip() for line in args.urls.split(",")]
+
+"""Print text only if the verbose flag is set. 
+    Defining the method this way ensures that verbosity won't be changed during the 
+    program runtime, even if the verbose flag gets changed somehow.
+"""
+verboseprint = print if args.verbose else lambda *a, **k: None
 
 def scraping(url):
     """Scraping text from articles.
@@ -85,22 +100,22 @@ def scraping_urls_from_technology_review(url):
     while 1:
         try:
             driver.find_element(By.ID, 'content-list__load-more-btn').click()
-            print("Loading news...")
+            verboseprint("Loading news...")
             sleep(0.5)
         except:
-            print("Loaded all news")
+            verboseprint("Loaded all news")
             
             urls = []
             headings = []
             h3s = driver.find_elements(By.CLASS_NAME, "teaserItem__title--32O7a")
             
-            print("Extracting headlines...")
+            verboseprint("Extracting headlines...")
             
             for x in h3s:
                 urls.append(x.find_element(By.TAG_NAME, "a").get_attribute("href"))
                 headings.append(x.text)
                 
-            print("Extracting text... This may take a while")
+            verboseprint("Extracting text... This may take a while")
 
             articles = []
             for i in range(len(urls)):
@@ -120,8 +135,11 @@ The return format:
       ...]
 '''
 
-# results = scraping_urls_from_technology_review("https://www.technologyreview.com/author/karen-hao/")
-results = scraping_urls_from_technology_review("https://www.technologyreview.com/author/melissa-heikkila/")
+results = []
+
+for url in urls:
+    verboseprint(f"Processing {url}")
+    results.append(scraping_urls_from_technology_review(url))
 
 if args.filename:
     with open(args.filename, "w") as f:
