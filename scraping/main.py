@@ -18,7 +18,7 @@ def scraping(url):
         A dict mapping keys to the corresponding list of tokens and list of list of tokens
         for example:
 
-        {'headlines': [['Headline','One'],['Headline','Two'],['Headline','Three']],
+        {'subheadings': [['Subheading','One'],['Subheading','Two'],['Subheading','Three']],
          'text': ['Hello','World','!','Hi','Python','!']}
 
     Raises:
@@ -53,70 +53,53 @@ def scraping(url):
 
     nltk_tokens = nltk.word_tokenize(text)
 
-    res = {"headlines": headline_list, "text": nltk_tokens}
+    res = {"subheadings": headline_list, "text": nltk_tokens}
     return res
 
 
-def scraping_more(urls):
-    res = []
-    for url in urls:
-        res.append(scraping(url))
-    return res
+def scraping_urls_from_technology_review(url):
+    def scraping_text_from_technology_review(inner_urls):
+        html = urlopen(inner_urls).read()
+        soup = BeautifulSoup(html, features="html.parser")
+        # get text
+        ps = soup.find_all("p")
+        res = []
+        for p in ps:
+            res += nltk.word_tokenize(p.text)
+        return {"text": res}
 
-
-def scraping_from_techreview(url):
     driver = webdriver.Chrome()
     driver.maximize_window()
     driver.implicitly_wait(26)
     driver.get(url)
 
-    driver.find_element(By.ID, 'content-list__load-more-btn').click()
-    sleep(2)
+    while 1:
+        try:
+            driver.find_element(By.ID, 'content-list__load-more-btn').click()
+            sleep(0.5)
+        except:
+            urls = []
+            headings = []
+            h3s = driver.find_elements(By.CLASS_NAME, "teaserItem__title--32O7a")
+            for x in h3s:
+                urls.append(x.find_element(By.TAG_NAME, "a").get_attribute("href"))
+                headings.append(x.text)
 
-    html = urlopen(url).read()
-    soup = BeautifulSoup(html, features="html.parser")
-    href = []
-    a_tags = soup.find_all("a", {"class": ""})
-    for a in a_tags:
-        href.append(a.get("href"))
-
-    print(href)  # TODO: remove in production, only left in for testing
-
-    return 0
-
-
-scraping_from_techreview("https://www.technologyreview.com/author/karen-hao/")
+            articles = []
+            for i in range(len(urls)):
+                articles.append(scraping_text_from_technology_review(urls[i]))
+                articles[i]['main_heading'] = headings[i]
+            return articles
 
 
 '''
-objective_article_urls = ["https://www.technologyreview.com/2022/04/22/1050394/artificial-intelligence-for-the-people/",
-                "https://www.technologyreview.com/2022/04/21/1050381/the-gig-workers-fighting-back-against-the-algorithms/",
-                "https://www.technologyreview.com/2022/04/20/1050392/ai-industry-appen-scale-data-labels/",
-                "https://www.technologyreview.com/2022/04/19/1049592/artificial-intelligence-colonialism/",
-                "https://www.technologyreview.com/2022/04/19/1049996/south-africa-ai-surveillance-digital-apartheid/",
-                "https://www.technologyreview.com/2021/12/02/1039397/china-initiative-database-doj/",
-                "https://www.technologyreview.com/2021/12/02/1040656/china-initative-us-justice-department/",
-                "https://www.technologyreview.com/2021/11/20/1039076/facebook-google-disinformation-clickbait/",
-                "https://www.technologyreview.com/2021/09/16/1035851/facebook-troll-farms-report-us-2020-election/",
-                "https://www.technologyreview.com/2021/10/05/1036519/facebook-whistleblower-frances-haugen-algorithms/",
-                "https://www.technologyreview.com/2021/09/13/1035449/ai-deepfake-app-face-swaps-women-into-porn/",
-                "https://www.technologyreview.com/2021/08/13/1031836/ai-ethics-responsible-data-stewardship/",
-                "https://www.technologyreview.com/2021/08/06/1030802/ai-robots-take-over-warehouses/",
-                "https://www.technologyreview.com/2021/07/29/1030260/facebook-whistleblower-sophie-zhang-global-political-manipulation/",
-                "https://www.technologyreview.com/2021/07/21/1029818/facebook-ugly-truth-frenkel-kang-nyt/",
-                "https://www.technologyreview.com/2021/07/09/1028140/ai-voice-actors-sound-human/",
-                "https://www.technologyreview.com/2021/06/27/1027350/anming-hu-china-initiative-research-espionage-spying/",
-                "https://www.technologyreview.com/2021/06/14/1026148/ai-big-tech-timnit-gebru-paper-ethics/",
-                "https://www.technologyreview.com/2021/06/11/1026135/ai-synthetic-data/",
-                "https://www.technologyreview.com/2021/06/04/1025742/ai-hate-speech-moderation/",
-                "https://www.technologyreview.com/2023/02/03/1067786/ai-models-spit-out-photos-of-real-people-and-copyrighted-images/",
-                "https://www.technologyreview.com/2023/01/31/1067436/could-chatgpt-do-my-job/",
-                "https://www.technologyreview.com/2023/01/27/1067338/a-watermark-for-chatbots-can-spot-text-written-by-an-ai/",
-                "https://www.technologyreview.com/2023/01/24/1067232/the-economy-is-down-but-ai-is-hot-where-do-we-go-from-here/",
-                "https://www.technologyreview.com/2023/01/17/1067014/heres-how-microsoft-could-use-chatgpt/",
-                "https://www.technologyreview.com/2023/01/10/1066538/the-eu-wants-to-regulate-your-favorite-ai-tools/",
-                "https://www.technologyreview.com/2022/12/23/1065852/whats-next-for-ai/",
-                "https://www.technologyreview.com/2022/12/20/1065667/how-ai-generated-text-is-poisoning-the-internet/",
-                "https://www.technologyreview.com/2022/12/19/1065596/how-to-spot-ai-generated-text/",
-                "https://www.technologyreview.com/2022/12/16/1065247/artists-can-now-opt-out-of-the-next-version-of-stable-diffusion/"]
+The return format:
+    list of dictionaries, the keys in dictionary are main_heading and text
+    [{"main_heading":sth,
+      "text":[token1,token2...,token n]},
+      {"main_heading":sth,
+      "text":[token1,token2...,token n]},
+      ...]
 '''
+
+results = scraping_urls_from_technology_review("https://www.technologyreview.com/author/karen-hao/")
