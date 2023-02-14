@@ -125,6 +125,36 @@ def scraping_urls_from_technology_review(url):
             return articles
 
 
+def scraping_urls_from_bbc():
+
+    # scrape 290 articles, but a few of them may not contain text as it is a video
+
+    def scraping_text_from_bbc(inner_urls):
+        i_html = urlopen(inner_urls).read()
+        i_soup = BeautifulSoup(i_html, features="html.parser")
+        # get text
+        ps = i_soup.find_all("p")
+        res = []
+        for p in ps:
+            res += nltk.word_tokenize(p.text)
+        return {"text": res}
+
+    urls = ["https://www.bbc.co.uk/search?q=AI+Machine+learning+Deep+learning&d=HOMEPAGE_PS"]
+    res = []
+    for i in range(2, 30):
+        urls.append("https://www.bbc.co.uk//search?q=AI+Machine+learning+Deep+learning&d=HOMEPAGE_PS&page=" + str(i))
+    for url in urls:
+        html = urlopen(url).read()
+        soup = BeautifulSoup(html, features="html.parser")
+        a_tags = soup.find_all("a", class_="ssrcss-rl2iw9-PromoLink e1f5wbog1")
+        p_tags = soup.find_all("p", class_="ssrcss-6arcww-PromoHeadline e1f5wbog5")
+        for i in range(len(a_tags)):
+            temp = scraping_text_from_bbc(a_tags[i]['href'])
+            temp['main_heading'] = p_tags[i].text
+            res.append(temp)
+    return res
+
+
 '''
 The return format:
     list of dictionaries, the keys in dictionary are main_heading and text
