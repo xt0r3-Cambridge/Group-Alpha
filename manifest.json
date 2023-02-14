@@ -12,21 +12,25 @@
   "content_scripts": [
     {
         "matches": ["http://*/*"],
-        "js": ["main.js"]
+        "js": ["main.js"],
+        "css": ["html/css/main.css"],
+        "html": ["html/card.html"]
     },
     {
         "matches": ["https://*/*"],
-        "js": ["main.js"]
+        "js": ["main.js"],
+        "css": ["html/css/main.css"],
+        "html": ["html/card.html"]
     }
   ],
   "web_accessible_resources": [
     {
       "matches": ["http://*/*"],
-      "resources": ["other.js"]
+      "resources": ["other.js", "html/card.html"]
     },
     {
       "matches": ["https://*/*"],
-      "resources": ["other.js"]
+      "resources": ["other.js", "html/card.html"]
     }
   ],
   "permissions": [
