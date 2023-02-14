@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "AI Hype Monitor",
+  "version": "0.1",
+  "description": "An addon for detecting overhype about AI in articles or social media",
+  "icons": {
+  },
+  "action": {
+    "popup": "popup.html",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+        "matches": ["http://*/*"],
+        "js": ["main.js"]
+    },
+    {
+        "matches": ["https://*/*"],
+        "js": ["main.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": ["http://*/*"],
+      "resources": ["other.js"]
+    },
+    {
+      "matches": ["https://*/*"],
+      "resources": ["other.js"]
+    }
+  ],
+  "permissions": [
+    "tabs"
+  ]
+}
