@@ -18,3 +18,4 @@ export function scrape(document) {
     }
     return array;
 }
+

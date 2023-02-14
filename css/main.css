@@ -1,0 +1,60 @@
+/* card.html */
+.card {
+    box-shadow: 3px 3px 10px #888;
+    width: 35%;
+    margin-left: auto;
+    margin-right: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.collapsible {
+    background-color: white;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 18px;
+    font-family: inherit;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    margin-left: 25px;
+}
+.collapsible-content {
+    display: none;  /* card content collapsed by default */
+    overflow: hidden;
+    margin-left: 32px;
+}
+
+
+/* popup.html */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+input[type=radio] {
+    border: 0;
+    width: 100%;
+    height: 2em;
+}
+.header {
+    padding: 1px;
+    text-align: center;
+    color: white;
+    background: cornflowerblue;
+    width: 300px;
+}
+.model-options {
+    display: flex;
+    margin-left: 15px;
+    margin-bottom: 15px;
+}
+.fixed {
+    width: 80%;
+}
+.flex-item {
+    flex-grow: 1;
+    position: relative;
+}
+.center {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+}
