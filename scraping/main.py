@@ -154,6 +154,33 @@ def scraping_urls_from_bbc():
             res.append(temp)
     return res
 
+def scraping_urls_from_guardian():
+
+    # scrape 300 articles
+
+    def scraping_text_from_guardian(inner_urls):
+        i_html = urlopen(inner_urls).read()
+        i_soup = BeautifulSoup(i_html, features="html.parser")
+        # get text
+        ps = i_soup.find_all("p")
+        res = []
+        for p in ps:
+            res += nltk.word_tokenize(p.text)
+        return {"text": res}
+
+    urls = []
+    res = []
+    for i in range(1, 16):
+        urls.append("https://www.theguardian.com/technology/artificialintelligenceai?page=" + str(i))
+    for url in urls:
+        html = urlopen(url).read()
+        soup = BeautifulSoup(html, features="html.parser")
+        a_tags = soup.find_all("a", {"class": "u-faux-block-link__overlay js-headline-text"})
+        for i in range(len(a_tags)):
+            temp = scraping_text_from_guardian(a_tags[i]['href'])
+            temp['main_heading'] = a_tags[i].text
+            res.append(temp)
+    return res
 
 '''
 The return format:
