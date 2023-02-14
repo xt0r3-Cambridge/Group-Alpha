@@ -6,8 +6,8 @@
   "icons": {
   },
   "action": {
-    "popup": "popup.html",
-    "default_popup": "popup.html"
+    "popup": "html/popup.html",
+    "default_popup": "html/popup.html"
   },
   "content_scripts": [
     {

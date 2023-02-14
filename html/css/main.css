@@ -38,6 +38,7 @@ input[type=radio] {
     padding: 1px;
     text-align: center;
     color: white;
+    width: 300px;
     background: cornflowerblue;
 }
 .model-options {
