@@ -7,12 +7,24 @@ from selenium.webdriver.common.by import By
 import json
 from argparse import ArgumentParser
 from enum import Enum
+import random
 
 # Example URLs:
 # https://www.technologyreview.com/author/melissa-heikkila/
 # https://www.technologyreview.com/author/niall-firth/
 
 # Parsing functionality for command line arguments
+
+
+class Source(str, Enum):
+    bbc = 'bbc'
+    guardian = 'guardian'
+    techreview = 'technologyreview'
+    dailymail = 'dailymail'
+
+
+valid_sources = [src.value for src in Source]
+
 parser = ArgumentParser()
 parser.add_argument("-f", "--file", dest="filename",
                     help="write scraped data to FILE in JSON format", metavar="FILE", required=False)
@@ -22,7 +34,10 @@ parser.add_argument("-u", "--urls", dest="urls",
 parser.add_argument("-v", "--verbose", dest="verbose",
                     help="Provide additional logging information", action='store_true')
 parser.add_argument("-s", "--source", dest="src",
-                    help="Choose which source to scrape the articless from. A comma separated list of values in [BBC, Guardian, Technologyreview]", metavar="BBC,Guardian,Technologyreview", required=True)
+                    help=f"Choose which source to scrape the articless from. A comma separated list of values in {valid_sources}",
+                    metavar="source1,source2,...", required=True)
+
+# TODO: make the number of articles modifiable. Low priority.
 
 args = parser.parse_args()
 
@@ -30,15 +45,6 @@ args = parser.parse_args()
 urls = [line.strip() for line in args.urls.split(",")] if args.urls else None
 
 # Parse sources
-
-
-class Source(str, Enum):
-    bbc = 'bbc'
-    guardian = 'guardian'
-    techreview = 'technologyreview'
-
-
-valid_sources = [src.value for src in Source]
 sources = [line.strip().lower() for line in args.src.split(",")
            if line.strip().lower() in valid_sources]
 
@@ -122,7 +128,7 @@ def scraping_urls_from_technology_review(url):
     while 1:
         try:
             driver.find_element(By.ID, 'content-list__load-more-btn').click()
-            verboseprint("Loading news from Technologyreciew...")
+            verboseprint("Loading news from Technologyreview...")
             sleep(0.5)
         except:
             verboseprint("Loaded all news")
@@ -215,12 +221,14 @@ def scraping_urls_from_guardian():
         a_tags = soup.find_all(
             "a", {"class": "u-faux-block-link__overlay js-headline-text"})
         for i in range(len(a_tags)):
+            verboseprint(f'scraping text from {a_tags[i]["href"]}')
             temp = scraping_text_from_guardian(a_tags[i]['href'])
             temp['main_heading'] = a_tags[i].text
             res.append(temp)
     return res
-    
-def scraping_urls_from_dailymail(num):
+
+
+def scraping_urls_from_dailymail(num=9000):
 
     # num: the input should be a multiple of 50, should be smaller than 9595
     # the number of articles returned won't be exactly as num, because it automatically eliminates videos(roughly 30%)
@@ -237,9 +245,11 @@ def scraping_urls_from_dailymail(num):
 
     urls = []
     res = []
+    verboseprint('scanning URLs for The Daily Mail')
     for i in range(num//50):
-        urls.append("https://www.dailymail.co.uk/home/search.html?offset="+str(i * 50)+"&size=50&sel=site&searchPhrase=AI&sort=relevant&type=article&type=video&type=permabox&days=all")
-    print("start")
+        urls.append("https://www.dailymail.co.uk/home/search.html?offset="+str(i * 50) +
+                    "&size=50&sel=site&searchPhrase=AI&sort=relevant&type=article&type=video&type=permabox&days=all")
+    verboseprint('URLs found')
     for j in range(len(urls)):
         html = urlopen(urls[j]).read()
         soup = BeautifulSoup(html, features="html.parser")
@@ -247,11 +257,12 @@ def scraping_urls_from_dailymail(num):
         spans = soup.find_all("span", class_="ccow icn-text")
         for i in range(len(h3_tags)):
             if spans[i].text == "Article":
-                temp = scraping_text_from_dailymail("https://www.dailymail.co.uk" + h3_tags[i].find_next("a")['href'])
+                temp = scraping_text_from_dailymail(
+                    "https://www.dailymail.co.uk" + h3_tags[i].find_next("a")['href'])
                 temp['main_heading'] = h3_tags[i].find_next("a").text
                 res.append(temp)
-        print(str(50 * (j + 1)) + " items are processed")
-    print(str(len(res)) + " articles are scraped")
+        verboseprint(f"{50 * (j + 1)} out of {num} items are processed")
+    verboseprint(f"{len(res)} articles are scraped")
     return res
 
 
@@ -277,6 +288,12 @@ if Source.bbc in sources:
 
 if Source.guardian in sources:
     results.extend(scraping_urls_from_guardian())
+
+if Source.dailymail in sources:
+    results.extend(scraping_urls_from_dailymail())
+
+random.seed(4832)
+random.shuffle(results)
 
 if args.filename:
     with open(args.filename, "w") as f:
