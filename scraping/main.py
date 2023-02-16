@@ -181,6 +181,40 @@ def scraping_urls_from_guardian():
             temp['main_heading'] = a_tags[i].text
             res.append(temp)
     return res
+    
+def scraping_urls_from_dailymail(num):
+
+    # num: the input should be a multiple of 50, should be smaller than 9595
+    # the number of articles returned won't be exactly as num, because it automatically eliminates videos(roughly 30%)
+
+    def scraping_text_from_dailymail(inner_urls):
+        i_html = urlopen(inner_urls).read()
+        i_soup = BeautifulSoup(i_html, features="html.parser")
+        # get text
+        ps = i_soup.find_all("p")
+        res = []
+        for p in ps:
+            res += nltk.word_tokenize(p.text)
+        return {"text": res}
+
+    urls = []
+    res = []
+    for i in range(num//50):
+        urls.append("https://www.dailymail.co.uk/home/search.html?offset="+str(i * 50)+"&size=50&sel=site&searchPhrase=AI&sort=relevant&type=article&type=video&type=permabox&days=all")
+    print("start")
+    for j in range(len(urls)):
+        html = urlopen(urls[j]).read()
+        soup = BeautifulSoup(html, features="html.parser")
+        h3_tags = soup.find_all("h3", class_="sch-res-title")
+        spans = soup.find_all("span", class_="ccow icn-text")
+        for i in range(len(h3_tags)):
+            if spans[i].text == "Article":
+                temp = scraping_text_from_dailymail("https://www.dailymail.co.uk" + h3_tags[i].find_next("a")['href'])
+                temp['main_heading'] = h3_tags[i].find_next("a").text
+                res.append(temp)
+        print(str(50 * (j + 1)) + " items are processed")
+    print(str(len(res)) + " articles are scraped")
+    return res
 
 '''
 The return format:
