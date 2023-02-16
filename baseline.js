@@ -25,7 +25,7 @@ TODO:
     first keyword == first looking for, if order doesn't matter, have all possible orders in keywords array
 */ 
 
-function findNearbyTokens(keywords,distance,tokens){
+function findNearbyTokens(keywords,distance,tokens) {
     if(keywords.length == 0){
         return [0];
     }

@@ -61,15 +61,6 @@ function loadOverlay() {
     }
 }
 
-document.getElementById('keyword-model').addEventListener("click", function (e) {
-    model = 0
-})
-
-document.getElementById('ai-model').addEventListener("click", function (e) {
-    model = 1
-})
-
-
 // $(function() {
 //     loadOverlay()
 
