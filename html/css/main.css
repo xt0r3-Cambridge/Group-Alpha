@@ -62,3 +62,37 @@ input[type=radio] {
     left: 50%;
     top: 40%;
 }
+
+
+/* about.html */
+h1 {
+    text-align: center;
+}
+p {
+    text-align: justify;
+}
+.col-left {
+    float: left;
+    width: 45%;
+    margin: auto;
+}
+.col-right {
+    float: right;
+    width: 45%;
+    margin: auto;
+}
+/* clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+/* responsive columns */
+@media screen and (max-width: 600px) {
+    .col-left {
+        width: 100%;
+    }
+    .col-right {
+        width: 100%;
+    }
+}
