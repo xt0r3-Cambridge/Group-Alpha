@@ -26,11 +26,11 @@
   "web_accessible_resources": [
     {
       "matches": ["http://*/*"],
-      "resources": ["other.js", "html/card.html"]
+      "resources": ["other.js", "baseline.js", "html/card.html"]
     },
     {
       "matches": ["https://*/*"],
-      "resources": ["other.js", "html/card.html"]
+      "resources": ["other.js", "baseline.js", "html/card.html"]
     }
   ],
   "permissions": [
