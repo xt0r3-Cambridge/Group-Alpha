@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import json
 from argparse import ArgumentParser
+from enum import Enum
 
 # Example URLs:
 # https://www.technologyreview.com/author/melissa-heikkila/
@@ -20,15 +21,36 @@ parser.add_argument("-u", "--urls", dest="urls",
                     metavar="url_1,url_2,...,url_n")
 parser.add_argument("-v", "--verbose", dest="verbose",
                     help="Provide additional logging information", action='store_true')
+parser.add_argument("-s", "--source", dest="src",
+                    help="Choose which source to scrape the articless from. A comma separated list of values in [BBC, Guardian, Technologyreview]", metavar="BBC,Guardian,Technologyreview", required=True)
 
 args = parser.parse_args()
+
+# Parse URLs for Technologyreview
 urls = [line.strip() for line in args.urls.split(",")] if args.urls else None
+
+# Parse sources
+
+
+class Source(str, Enum):
+    bbc = 'bbc'
+    guardian = 'guardian'
+    techreview = 'technologyreview'
+
+
+valid_sources = [src.value for src in Source]
+sources = [line.strip().lower() for line in args.src.split(",")
+           if line.strip().lower() in valid_sources]
+
+if len(sources) == 0:
+    raise ValueError("No valid sources were provided")
 
 """Print text only if the verbose flag is set. 
     Defining the method this way ensures that verbosity won't be changed during the 
     program runtime, even if the verbose flag gets changed somehow.
 """
 verboseprint = print if args.verbose else lambda *a, **k: None
+
 
 def scraping(url):
     """Scraping text from articles.
@@ -100,28 +122,30 @@ def scraping_urls_from_technology_review(url):
     while 1:
         try:
             driver.find_element(By.ID, 'content-list__load-more-btn').click()
-            verboseprint("Loading news...")
+            verboseprint("Loading news from Technologyreciew...")
             sleep(0.5)
         except:
             verboseprint("Loaded all news")
-            
+
             urls = []
             headings = []
-            h3s = driver.find_elements(By.CLASS_NAME, "teaserItem__title--32O7a")
-            
+            h3s = driver.find_elements(
+                By.CLASS_NAME, "teaserItem__title--32O7a")
+
             verboseprint("Extracting headlines...")
-            
+
             for x in h3s:
-                urls.append(x.find_element(By.TAG_NAME, "a").get_attribute("href"))
+                urls.append(x.find_element(
+                    By.TAG_NAME, "a").get_attribute("href"))
                 headings.append(x.text)
-                
+
             verboseprint("Extracting text... This may take a while")
 
             articles = []
             for i in range(len(urls)):
                 articles.append(scraping_text_from_technology_review(urls[i]))
                 articles[i]['main_heading'] = headings[i]
-                
+
             return articles
 
 
@@ -139,17 +163,21 @@ def scraping_urls_from_bbc():
             res += nltk.word_tokenize(p.text)
         return {"text": res}
 
-    urls = ["https://www.bbc.co.uk/search?q=AI+Machine+learning+Deep+learning&d=HOMEPAGE_PS"]
+    urls = [
+        "https://www.bbc.co.uk/search?q=AI+Machine+learning+Deep+learning&d=HOMEPAGE_PS"]
     res = []
-    verboseprint('scanning URLs')
+    verboseprint('scanning URLs for the BBC')
     for i in range(2, 30):
-        verboseprint(f'scanning results on page {i}')
-        urls.append("https://www.bbc.co.uk//search?q=AI+Machine+learning+Deep+learning&d=HOMEPAGE_PS&page=" + str(i))
+        urls.append(
+            "https://www.bbc.co.uk//search?q=AI+Machine+learning+Deep+learning&d=HOMEPAGE_PS&page=" + str(i))
+    verboseprint('URLs found')
     for url in urls:
+        verboseprint(f'scanning results on page {url}')
         html = urlopen(url).read()
         soup = BeautifulSoup(html, features="html.parser")
         a_tags = soup.find_all("a", class_="ssrcss-rl2iw9-PromoLink e1f5wbog1")
-        p_tags = soup.find_all("p", class_="ssrcss-6arcww-PromoHeadline e1f5wbog5")
+        p_tags = soup.find_all(
+            "p", class_="ssrcss-6arcww-PromoHeadline e1f5wbog5")
         for i in range(len(a_tags)):
             temp = scraping_text_from_bbc(a_tags[i]['href'])
             temp['main_heading'] = p_tags[i].text
@@ -157,6 +185,7 @@ def scraping_urls_from_bbc():
     verboseprint('Successfully scanned text, writing to file...')
 
     return res
+
 
 def scraping_urls_from_guardian():
 
@@ -174,12 +203,17 @@ def scraping_urls_from_guardian():
 
     urls = []
     res = []
+    verboseprint('scanning URLs for The Guardian')
     for i in range(1, 16):
-        urls.append("https://www.theguardian.com/technology/artificialintelligenceai?page=" + str(i))
+        urls.append(
+            "https://www.theguardian.com/technology/artificialintelligenceai?page=" + str(i))
+    verboseprint('URLs found')
     for url in urls:
+        verboseprint(f'scanning results on page {url}')
         html = urlopen(url).read()
         soup = BeautifulSoup(html, features="html.parser")
-        a_tags = soup.find_all("a", {"class": "u-faux-block-link__overlay js-headline-text"})
+        a_tags = soup.find_all(
+            "a", {"class": "u-faux-block-link__overlay js-headline-text"})
         for i in range(len(a_tags)):
             temp = scraping_text_from_guardian(a_tags[i]['href'])
             temp['main_heading'] = a_tags[i].text
@@ -220,6 +254,7 @@ def scraping_urls_from_dailymail(num):
     print(str(len(res)) + " articles are scraped")
     return res
 
+
 '''
 The return format:
     list of dictionaries, the keys in dictionary are main_heading and text
@@ -232,12 +267,16 @@ The return format:
 
 results = []
 
-if urls:
+if Source.techreview in sources and urls:
     for url in urls:
         verboseprint(f"Processing {url}")
         results.append(scraping_urls_from_technology_review(url))
-else:
-    results = scraping_urls_from_bbc()
+
+if Source.bbc in sources:
+    results.extend(scraping_urls_from_bbc())
+
+if Source.guardian in sources:
+    results.extend(scraping_urls_from_guardian())
 
 if args.filename:
     with open(args.filename, "w") as f:
