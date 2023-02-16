@@ -4,31 +4,7 @@ from bs4 import BeautifulSoup
 import nltk
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import json
-from argparse import ArgumentParser
 
-# Example URLs:
-# https://www.technologyreview.com/author/melissa-heikkila/
-# https://www.technologyreview.com/author/niall-firth/
-
-# Parsing functionality for command line arguments
-parser = ArgumentParser()
-parser.add_argument("-f", "--file", dest="filename",
-                    help="write scraped data to FILE in JSON format", metavar="FILE", required=False)
-parser.add_argument("-u", "--urls", dest="urls",
-                    help="The URLs you want to scrape the data from. At the moment, only technologyreview.com is supported.",
-                    metavar="url_1,url_2,...,url_n", required=True)
-parser.add_argument("-v", "--verbose", dest="verbose",
-                    help="Provide additional logging information", action='store_true')
-
-args = parser.parse_args()
-urls = [line.strip() for line in args.urls.split(",")]
-
-"""Print text only if the verbose flag is set. 
-    Defining the method this way ensures that verbosity won't be changed during the 
-    program runtime, even if the verbose flag gets changed somehow.
-"""
-verboseprint = print if args.verbose else lambda *a, **k: None
 
 def scraping(url):
     """Scraping text from articles.
@@ -81,7 +57,8 @@ def scraping(url):
     return res
 
 
-def scraping_urls_from_technology_review(url):
+def scraping_urls_from_technology_review(url="https://www.technologyreview.com/author/karen-hao/"):
+
     def scraping_text_from_technology_review(inner_urls):
         html = urlopen(inner_urls).read()
         soup = BeautifulSoup(html, features="html.parser")
@@ -100,28 +77,19 @@ def scraping_urls_from_technology_review(url):
     while 1:
         try:
             driver.find_element(By.ID, 'content-list__load-more-btn').click()
-            verboseprint("Loading news...")
             sleep(0.5)
         except:
-            verboseprint("Loaded all news")
-            
             urls = []
             headings = []
             h3s = driver.find_elements(By.CLASS_NAME, "teaserItem__title--32O7a")
-            
-            verboseprint("Extracting headlines...")
-            
             for x in h3s:
                 urls.append(x.find_element(By.TAG_NAME, "a").get_attribute("href"))
                 headings.append(x.text)
-                
-            verboseprint("Extracting text... This may take a while")
 
             articles = []
             for i in range(len(urls)):
                 articles.append(scraping_text_from_technology_review(urls[i]))
                 articles[i]['main_heading'] = headings[i]
-                
             return articles
 
 
@@ -154,34 +122,7 @@ def scraping_urls_from_bbc():
             res.append(temp)
     return res
 
-def scraping_urls_from_guardian():
 
-    # scrape 300 articles
-
-    def scraping_text_from_guardian(inner_urls):
-        i_html = urlopen(inner_urls).read()
-        i_soup = BeautifulSoup(i_html, features="html.parser")
-        # get text
-        ps = i_soup.find_all("p")
-        res = []
-        for p in ps:
-            res += nltk.word_tokenize(p.text)
-        return {"text": res}
-
-    urls = []
-    res = []
-    for i in range(1, 16):
-        urls.append("https://www.theguardian.com/technology/artificialintelligenceai?page=" + str(i))
-    for url in urls:
-        html = urlopen(url).read()
-        soup = BeautifulSoup(html, features="html.parser")
-        a_tags = soup.find_all("a", {"class": "u-faux-block-link__overlay js-headline-text"})
-        for i in range(len(a_tags)):
-            temp = scraping_text_from_guardian(a_tags[i]['href'])
-            temp['main_heading'] = a_tags[i].text
-            res.append(temp)
-    return res
-    
 def scraping_urls_from_dailymail(num):
 
     # num: the input should be a multiple of 50, should be smaller than 9595
@@ -216,6 +157,36 @@ def scraping_urls_from_dailymail(num):
     print(str(len(res)) + " articles are scraped")
     return res
 
+
+def scraping_urls_from_guardian():
+
+    # scrape 300 articles
+
+    def scraping_text_from_guardian(inner_urls):
+        i_html = urlopen(inner_urls).read()
+        i_soup = BeautifulSoup(i_html, features="html.parser")
+        # get text
+        ps = i_soup.find_all("p")
+        res = []
+        for p in ps:
+            res += nltk.word_tokenize(p.text)
+        return {"text": res}
+
+    urls = []
+    res = []
+    for i in range(1, 16):
+        urls.append("https://www.theguardian.com/technology/artificialintelligenceai?page=" + str(i))
+    for url in urls:
+        html = urlopen(url).read()
+        soup = BeautifulSoup(html, features="html.parser")
+        a_tags = soup.find_all("a", {"class": "u-faux-block-link__overlay js-headline-text"})
+        for i in range(len(a_tags)):
+            temp = scraping_text_from_guardian(a_tags[i]['href'])
+            temp['main_heading'] = a_tags[i].text
+            res.append(temp)
+    return res
+
+
 '''
 The return format:
     list of dictionaries, the keys in dictionary are main_heading and text
@@ -226,6 +197,5 @@ The return format:
       ...]
 '''
 
-results = []
+scraping_urls_from_guardian()
 
-results = scraping_urls_from_guardian()
