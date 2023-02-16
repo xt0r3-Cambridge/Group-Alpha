@@ -17,12 +17,12 @@ parser.add_argument("-f", "--file", dest="filename",
                     help="write scraped data to FILE in JSON format", metavar="FILE", required=False)
 parser.add_argument("-u", "--urls", dest="urls",
                     help="The URLs you want to scrape the data from. At the moment, only technologyreview.com is supported.",
-                    metavar="url_1,url_2,...,url_n", required=True)
+                    metavar="url_1,url_2,...,url_n")
 parser.add_argument("-v", "--verbose", dest="verbose",
                     help="Provide additional logging information", action='store_true')
 
 args = parser.parse_args()
-urls = [line.strip() for line in args.urls.split(",")]
+urls = [line.strip() for line in args.urls.split(",")] if args.urls else None
 
 """Print text only if the verbose flag is set. 
     Defining the method this way ensures that verbosity won't be changed during the 
@@ -141,7 +141,9 @@ def scraping_urls_from_bbc():
 
     urls = ["https://www.bbc.co.uk/search?q=AI+Machine+learning+Deep+learning&d=HOMEPAGE_PS"]
     res = []
+    verboseprint('scanning URLs')
     for i in range(2, 30):
+        verboseprint(f'scanning results on page {i}')
         urls.append("https://www.bbc.co.uk//search?q=AI+Machine+learning+Deep+learning&d=HOMEPAGE_PS&page=" + str(i))
     for url in urls:
         html = urlopen(url).read()
@@ -152,6 +154,8 @@ def scraping_urls_from_bbc():
             temp = scraping_text_from_bbc(a_tags[i]['href'])
             temp['main_heading'] = p_tags[i].text
             res.append(temp)
+    verboseprint('Successfully scanned text, writing to file...')
+
     return res
 
 def scraping_urls_from_guardian():
@@ -228,9 +232,12 @@ The return format:
 
 results = []
 
-for url in urls:
-    verboseprint(f"Processing {url}")
-    results.append(scraping_urls_from_technology_review(url))
+if urls:
+    for url in urls:
+        verboseprint(f"Processing {url}")
+        results.append(scraping_urls_from_technology_review(url))
+else:
+    results = scraping_urls_from_bbc()
 
 if args.filename:
     with open(args.filename, "w") as f:
