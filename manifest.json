@@ -13,14 +13,12 @@
     {
         "matches": ["http://*/*"],
         "js": ["inject.js", "html/js/card.js"],
-        "css": ["html/css/main.css"],
-        "html": ["html/card.html"]
+        "css": ["html/css/main.css"]
     },
     {
         "matches": ["https://*/*"],
         "js": ["inject.js", "html/js/card.js"],
-        "css": ["html/css/main.css"],
-        "html": ["html/card.html"]
+        "css": ["html/css/main.css"]
     }
   ],
   "web_accessible_resources": [

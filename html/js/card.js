@@ -40,24 +40,25 @@ function loadOverlay() {
     if(problematic){
         var filtered = links.filter((e,i) => arr[i]>0)
         var txt = ""
-        var links=""
+        var link=""
         for(var i=0;i<filtered.length; i++){
             txt += filtered[i][0] + "</br>"
             for(var j=1; j<filtered[i].length; j++){
-                links += filtered[i][j] + "</br>"
+                link += filtered[i][j] + "</br>"
             }
         }
-        document.getElementById('title').innerHTML("This page appears to contain problematic metaphors about AI! &#128064")
-        document.getElementById('pitfalls-title').innerHTML("&#10071 Pitfalls we think it contains")
-        document.getElementById('links-text').innerHTML(links)
-        document.getElementById('pitfalls-text').innerHTML(txt)
-        document.getElementById('links-title').innerHTML("&#9989 Sources we recommend reading")
+        console.log(link)
+        document.getElementById('title').innerHTML= "This page appears to contain problematic metaphors about AI! &#128064"
+        document.getElementById('pitfalls-title').innerHTML = "&#10071 Pitfalls we think it contains"
+        document.getElementById('links-text').innerHTML = link
+        document.getElementById('pitfalls-text').innerHTML = txt
+        document.getElementById('links-title').innerHTML = "&#9989 Sources we recommend reading"
     } else {
-        document.getElementById('title').innerHTML("Nothing to report!")
-        document.getElementById('pitfalls-title').innerHTML("")
-        document.getElementById('links-text').innerHTML("")
-        document.getElementById('pitfalls-text').innerHTML("")
-        document.getElementById('links-title').innerHTML("")
+        document.getElementById('title').innerHTML = "Nothing to report!"
+        document.getElementById('pitfalls-title').innerHTML = ""
+        document.getElementById('links-text').innerHTML = ""
+        document.getElementById('pitfalls-text').innerHTML = ""
+        document.getElementById('links-title').innerHTML = ""
     }
 }
 
