@@ -62,6 +62,10 @@ function loadOverlay() {
     }
 }
 
+fetch(chrome.runtime.getURL('/html/card.html')).then(r => r.text()).then(html => {
+  document.body.insertAdjacentHTML('beforeend', html);
+}).then(r => loadOverlay());
+
 // $(function() {
 //     loadOverlay()
 
