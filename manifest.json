@@ -12,13 +12,13 @@
   "content_scripts": [
     {
         "matches": ["http://*/*"],
-        "js": ["main.js", "html/js/card.js"],
+        "js": ["inject.js", "html/js/card.js"],
         "css": ["html/css/main.css"],
         "html": ["html/card.html"]
     },
     {
         "matches": ["https://*/*"],
-        "js": ["main.js", "html/js/card.js"],
+        "js": ["inject.js", "html/js/card.js"],
         "css": ["html/css/main.css"],
         "html": ["html/card.html"]
     }
