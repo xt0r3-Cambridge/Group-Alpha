@@ -1,13 +1,24 @@
-let model = await chrome.storage.local.get("model");
+document.body.onload = function() {
+    chrome.storage.sync.get("model", (model) => {
+        let modelNumber = model["model"];
+        if (modelNumber == 0) {
+            document.getElementById('keyword-model').checked = true;
+            document.getElementById('ai-model').checked = false;
+        }
+        else {
+            document.getElementById('keyword-model').checked = false;
+            document.getElementById('ai-model').checked = true;
+        }
+    });
+}
+
 
 
 
 document.getElementById('keyword-model').addEventListener("click", function (e) {
-    model = 0
-    chrome.storage.sync.set({"model": model})
+    chrome.storage.sync.set({"model": 0});
 })
 
 document.getElementById('ai-model').addEventListener("click", function (e) {
-    model = 1
-    chrome.storage.sync.set({"model": model})
+    chrome.storage.sync.set({"model": 1});
 })
