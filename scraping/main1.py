@@ -1,3 +1,4 @@
+import json
 from time import sleep
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
@@ -197,5 +198,15 @@ The return format:
       ...]
 '''
 
-scraping_urls_from_guardian()
 
+def choose_website(website):
+    if website == 'guardian':
+        with open('guardian.json', 'w') as f:
+            json.dump(scraping_urls_from_guardian(), f)
+
+    elif website == 'dailymail':
+        with open('dailymail.json', 'w') as f:
+            json.dump(scraping_urls_from_dailymail(9550), f)
+
+
+choose_website("dailymail")
