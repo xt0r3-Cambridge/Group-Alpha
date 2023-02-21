@@ -188,6 +188,45 @@ def scraping_urls_from_guardian():
     return res
 
 
+def scraping_urls_from_digital_trends(url="https://www.digitaltrends.com/?s=AI"):
+
+    def scraping_text_from_digital_trends(inner_urls):
+        html = urlopen(inner_urls).read()
+        soup = BeautifulSoup(html, features="html.parser")
+        # get text
+        ps = soup.find_all("p")
+        res = []
+        for p in ps:
+            res += nltk.word_tokenize(p.text)
+        return {"text": res}
+
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.implicitly_wait(26)
+    driver.get(url)
+
+    driver.find_element(By.ID, 'onetrust-accept-btn-handler').click()
+    sleep(5)
+    driver.find_element(By.CLASS_NAME, "b-adhesion__close").click()
+    i = 50
+    while i > 0:
+        driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/section/div[2]/button').click()
+        sleep(2)
+        i -= 1
+
+    urls = []
+    headings = []
+    divs = driver.find_elements(By.CLASS_NAME, "b-meta__title.dt-clamp.dt-clamp-2")
+    for x in divs:
+        urls.append(x.find_element(By.TAG_NAME, "a").get_attribute("href"))
+        headings.append(x.text)
+
+    articles = []
+    for i in range(len(urls)):
+        articles.append(scraping_text_from_digital_trends(urls[i]))
+        articles[i]['main_heading'] = headings[i]
+    return articles
+
 '''
 The return format:
     list of dictionaries, the keys in dictionary are main_heading and text
@@ -208,5 +247,9 @@ def choose_website(website):
         with open('dailymail.json', 'w') as f:
             json.dump(scraping_urls_from_dailymail(9550), f)
 
+    elif website == 'digitaltrends':
+        with open('digitaltrends.json', 'w') as f:
+            json.dump(scraping_urls_from_digital_trends(), f)
 
-choose_website("dailymail")
+
+choose_website("digitaltrends")
