@@ -1,7 +1,7 @@
 var problematic = false
 var model = 0
-var baseline_arr = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-var complex_arr = [0.8, 0.71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.4, 0.72, 0, 0]
+var baseline_arr
+var complex_arr
 var threshold = 0.700
 
 const links = [
@@ -24,40 +24,37 @@ const links = [
     ["<p>Describing AI as black boxes - shifting accountability for AI tools from developers to the underlying technology, ignoring a lot of research on model interpretability and explainability.", "<a href='https://royalsocietypublishing.org/doi/epdf/10.1098/rsta.2018.0084'>The Fallacy of Inscrutability</a>"]
 ]
 
-function getProblematicArr() {
-    return model == 0 ? baseline_arr : complex_arr.map(function (a, i) {
-        return a > threshold ? 1 : 0
-    })
+async function getProblematicArr() {
+    if(model == 0){
+        if(!baseline_arr){
+            baseline_arr = await runClassifier()
+        }
+        return baseline_arr
+    } else {
+        if(!complex_arr){
+            complex_arr = await runClassifier()
+        }
+        return complex_arr
+    }
 }
 
 async function runClassifier() {
-    let modelID = 0;
-    chrome.storage.sync.get("model", (model) => {
-        modelID = model["model"];
-    });
-    console.log(modelID);
     let scrape = await import("/html/js/scrape.js");
     let tags = scrape.getTokenizedPTags();
-    console.log(tags);
-    let result = null;
-    if (modelID == 0) { // Keyword Model
+    var result
+    if (model == 0) { // Keyword Model
         console.log("baseline");
         let baseline = await import("/html/js/baseline.js");
-        console.log("baseline imported");
         result = baseline.baseline(tags);
-        console.log("baseline finished");
     } else { // AI Model
-
+        result = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     }
     return result;
 }
 
-function loadOverlay() {
-    (async () => { // needs to be in an async block for importing other files
-        let result = await runClassifier();
-        console.log(result);
-    })();
-    var arr = getProblematicArr();
+async function loadOverlay() {
+    var arr = await getProblematicArr();
+    console.log(arr)
     if ((arr.reduce((x, a) => x + a, 0)) > 0) {
         problematic = true
     } else {
@@ -99,7 +96,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 });
 
 fetch(chrome.runtime.getURL('/html/card.html')).then(r => r.text()).then(html => {
-    document.body.insertAdjacentHTML('beforeend', html);
+    document.body.insertAdjacentHTML('afterbegin', html);
 }).then(r => {
     chrome.storage.sync.get().then(items => {
         model = items.model
