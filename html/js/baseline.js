@@ -41,7 +41,7 @@ function findNearbyTokens(keywords,distance,tokens) {
     for(let i = 0; i < tokens.length; i++){               //iterate through text
         let word = tokens[i].toUpperCase();       
         for (let k = 0; k < watchlist.length; k++){         //for each word, test each keyword
-            if(watchlist[k] == 0){                          //if watchlist entry == 0; that ones been done :)
+            if(watchlist[k] == 0) {                          //if watchlist entry == 0; that ones been done :)
                 continue;
             }
             if(word == watchlist[k][0].toUpperCase()){
@@ -51,7 +51,6 @@ function findNearbyTokens(keywords,distance,tokens) {
                     watchlist[k] = 0;
                 }                                           
                 else{
-                    console.log()
                     watchlist.push([keywords[keywordIndex][(watchlist[k][2]+1)],keywordIndex,watchlist[k][2]+1,distance[keywordIndex]]);          //put entry into watchlist of next keyword in group, and increaase position
                 }
             }

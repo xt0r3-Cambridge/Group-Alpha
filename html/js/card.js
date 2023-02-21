@@ -37,6 +37,7 @@ async function runClassifier() {
     console.log(modelID);
     let scrape = await import("/html/js/scrape.js");
     let tags = scrape.getTokenizedPTags();
+    console.log(tags);
     let result = null;
     if (modelID == 0) { // Keyword Model
         console.log("baseline");
