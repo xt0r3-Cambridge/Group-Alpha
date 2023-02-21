@@ -273,3 +273,6 @@ tags
 # Ignore model data
 **/test_trainer
 **/bert-finetuned-multi-label-ai-hype
+
+# Ignore one-vs-rest classifier
+model/*-vs-rest/
