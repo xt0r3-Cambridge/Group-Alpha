@@ -12,12 +12,12 @@
   "content_scripts": [
     {
         "matches": ["http://*/*"],
-        "js": ["inject.js", "html/js/card.js"],
+        "js": ["html/js/card.js"],
         "css": ["html/css/main.css"]
     },
     {
         "matches": ["https://*/*"],
-        "js": ["inject.js", "html/js/card.js"],
+        "js": ["html/js/card.js"],
         "css": ["html/css/main.css"]
     }
   ],
