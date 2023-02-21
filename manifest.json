@@ -24,11 +24,11 @@
   "web_accessible_resources": [
     {
       "matches": ["http://*/*"],
-      "resources": ["other.js", "baseline.js", "html/card.html"]
+      "resources": ["other.js", "html/js/baseline.js", "html/card.html", "html/js/scrape.js"]
     },
     {
       "matches": ["https://*/*"],
-      "resources": ["other.js", "baseline.js", "html/card.html"]
+      "resources": ["other.js", "html/js/baseline.js", "html/card.html", "html/js/scrape.js"]
     }
   ],
   "permissions": [

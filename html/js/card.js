@@ -29,7 +29,32 @@ function getProblematicArr() {
         return a>threshold ? 1 : 0})
 }
 
+async function runClassifier() {
+    let modelID = 0;
+    chrome.storage.sync.get("model", (model) => {
+        modelID = model["model"];
+    });
+    console.log(modelID);
+    let scrape = await import("/html/js/scrape.js");
+    let tags = scrape.getTokenizedPTags();
+    let result = null;
+    if (modelID == 0) { // Keyword Model
+        console.log("baseline");
+        let baseline = await import("/html/js/baseline.js");
+        console.log("baseline imported");
+        result = baseline.baseline(tags);
+        console.log("baseline finished");
+    } else { // AI Model
+
+    }
+    return result;
+}
+
 function loadOverlay() {
+    (async () => { // needs to be in an async block for importing other files
+        let result = await runClassifier();
+        console.log(result);
+    })();
     var arr = getProblematicArr();
     if((arr.reduce((x,a) => x+a,0)) > 0){
         problematic=true

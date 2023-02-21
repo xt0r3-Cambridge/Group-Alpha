@@ -103,7 +103,7 @@ class Pitfall{
 
 
 
-function baseline(tokens){
+export function baseline(tokens){
     let decision = new Array(18).fill(0);
     let pitfalls = new Array(18);
 
@@ -136,7 +136,5 @@ function baseline(tokens){
     return decision;
 
 }
-
-exports.baseline = baseline;
 
 // main(['take','over','and','eventually','could','develop',]);
