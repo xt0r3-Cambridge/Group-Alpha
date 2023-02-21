@@ -22,3 +22,7 @@ document.getElementById('keyword-model').addEventListener("click", function (e) 
 document.getElementById('ai-model').addEventListener("click", function (e) {
     chrome.storage.sync.set({"model": 1});
 })
+
+document.getElementById("about").addEventListener('click', function (e) {
+    chrome.tabs.create({url: e.target.href});
+})
