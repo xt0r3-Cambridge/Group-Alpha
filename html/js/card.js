@@ -1,8 +1,8 @@
 var problematic = false
 var model = 0
-var baseline_arr = [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-var complex_arr = [0.8,0.71,0,0,0,0,0,0,0,0,0,0,0,0,0.4,0.72,0,0]
-var threshold =0.700
+var baseline_arr
+var complex_arr
+var threshold = 0.700
 
 const links = [
     ["Attributing agency to AI - describing AI systems as taking actions independent of human supervision or implying that they may soon be able to do so.", "<a href='https://www.aimyths.org/ai-has-agency'>Agency</a>"],
@@ -24,31 +24,54 @@ const links = [
     ["<p>Describing AI as black boxes - shifting accountability for AI tools from developers to the underlying technology, ignoring a lot of research on model interpretability and explainability.", "<a href='https://royalsocietypublishing.org/doi/epdf/10.1098/rsta.2018.0084'>The Fallacy of Inscrutability</a>"]
 ]
 
-function getProblematicArr() {
-    return model == 0 ? baseline_arr : complex_arr.map(function (a,i){
-        return a>threshold ? 1 : 0})
+async function getProblematicArr() {
+    if(model == 0){
+        if(!baseline_arr){
+            baseline_arr = await runClassifier()
+        }
+        return baseline_arr
+    } else {
+        if(!complex_arr){
+            complex_arr = await runClassifier()
+        }
+        return complex_arr
+    }
 }
 
-function loadOverlay() {
-    var arr = getProblematicArr();
-    if((arr.reduce((x,a) => x+a,0)) > 0){
-        problematic=true
+async function runClassifier() {
+    let scrape = await import("/html/js/scrape.js");
+    let tags = scrape.getTokenizedPTags();
+    var result
+    if (model == 0) { // Keyword Model
+        console.log("baseline");
+        let baseline = await import("/html/js/baseline.js");
+        result = baseline.baseline(tags);
+    } else { // AI Model
+        result = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    }
+    return result;
+}
+
+async function loadOverlay() {
+    var arr = await getProblematicArr();
+    console.log(arr)
+    if ((arr.reduce((x, a) => x + a, 0)) > 0) {
+        problematic = true
     } else {
         problematic = false
     }
 
-    if(problematic){
-        var filtered = links.filter((e,i) => arr[i]>0)
+    if (problematic) {
+        var filtered = links.filter((e, i) => arr[i] > 0)
         var txt = ""
-        var link=""
-        for(var i=0;i<filtered.length; i++){
+        var link = ""
+        for (var i = 0; i < filtered.length; i++) {
             txt += filtered[i][0] + "</br>"
-            for(var j=1; j<filtered[i].length; j++){
+            for (var j = 1; j < filtered[i].length; j++) {
                 link += filtered[i][j] + "</br>"
             }
         }
-        console.log(link)
-        document.getElementById('title').innerHTML= "This page appears to contain problematic metaphors about AI! &#128064"
+        document.getElementById('title').innerHTML = "This page appears to contain problematic metaphors about AI! &#128064"
         document.getElementById('pitfalls-title').innerHTML = "&#10071 Pitfalls we think it contains"
         document.getElementById('links-text').innerHTML = link
         document.getElementById('pitfalls-text').innerHTML = txt
@@ -62,23 +85,22 @@ function loadOverlay() {
     }
 }
 
+chrome.storage.onChanged.addListener((changes, namespace) => {
+    console.log(Object.entries(changes))
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+        if (key == "model") {
+            model = newValue
+            loadOverlay()
+        }
+    }
+});
+
 fetch(chrome.runtime.getURL('/html/card.html')).then(r => r.text()).then(html => {
-  document.body.insertAdjacentHTML('beforeend', html);
-}).then(r => loadOverlay());
-
-// $(function() {
-//     loadOverlay()
-
-//     model == 0 ? $('#keyword').prop('checked', true) : $('#ai').prop('checked', true)
-
-//     $('#button1').on('click', function(e) {
-//         $('#button1').text($('#button1').text() == 'close' ? 'open' : 'close')
-//         $('#overlay').toggle()
-//     }) 
-    
-//     $('#button2').on('click', function (e) {
-//         $('#model_selection').toggle()
-//     })
-
-    
-// })
+    document.body.insertAdjacentHTML('afterbegin', html);
+}).then(r => {
+    chrome.storage.sync.get().then(items => {
+        model = items.model
+        loadOverlay()
+    })
+}
+);
