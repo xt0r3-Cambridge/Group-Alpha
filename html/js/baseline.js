@@ -65,7 +65,6 @@ function findNearbyTokens(keywords,distance,tokens) {
             //TODO -> optional: set all with the same keywordIndex to 0.
         }
         //TODO -> optional: remove finished watchlist entries.
-
     }
 
     return decision;
@@ -106,12 +105,12 @@ export function baseline(tokens){
     let decision = new Array(18).fill(0);
     let pitfalls = new Array(18);
 
-    pitfalls[0] = new Pitfall(["Attributing agency to AI",[['TAKE','OVER'],['AI','INDEPENDENCE']],[1,6],0]);
+    pitfalls[0] = new Pitfall(["Attributing agency to AI",[['TAKE','OVER'],['TAKING','OVER'],['AI','INDEPENDENCE'],['FIGHTING','AGAINST'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING'],['IT','AUTOCOMPLETED']],[1,1,6,3,1,1],0]);
     pitfalls[1] = new Pitfall(["Suggestive imagery",[],[],0]);
     pitfalls[2] = new Pitfall(["Comparison with human intelligence",[["HUMAN","INTELLIGENCE"],['SENTIENT']],[1,0],0]);
     pitfalls[3] = new Pitfall(["Comparison with human skills",[['AS','EFFECTIVE'],['AS','SUCCESSFULLY']],[1,1],0]);
     pitfalls[4] = new Pitfall(['Hyperbole',[['REVOLUTIONARY'],['GROUNDBREAKING']],[0,0],0]);
-    pitfalls[5] = new Pitfall(['Uncritical comparison with historical transformations',[['MORE','CONSEQUENTIAL'],['REVOLUTION']],[1,0],0]);
+    pitfalls[5] = new Pitfall(['Uncritical comparison with historical transformations',[['MORE','CONSEQUENTIAL'],['REVOLUTION'],['NEW','COLONIAL'],['NEW','WORLD','ORDER']],[1,0,2,3],0]);
     pitfalls[6] = new Pitfall(['Unjustified claims about future progress',[['WILL','BE','USEFUL'],['BECOME','ESSENTIAL'],['BECOME','USEFUL'],['EVENTUALLY','DEVELOP']],[1,4,4,4],0]);
     pitfalls[7] = new Pitfall(['False claims about progress',[['TEACHES','ITSELF'],['BECOMES','INDEPENDENT']],[1,5],0]);
     pitfalls[8] = new Pitfall(['Incorrect claims about what a study reports',[],[],0]);
@@ -137,3 +136,4 @@ export function baseline(tokens){
 }
 
 // main(['take','over','and','eventually','could','develop',]);
+// up to ""
