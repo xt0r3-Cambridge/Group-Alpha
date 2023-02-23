@@ -55,7 +55,9 @@ async function runClassifier() {
 async function loadOverlay() {
     var arr = await getProblematicArr();
     console.log(arr)
-    if ((arr.reduce((x, a) => x + a, 0)) > 0) {
+    // I'm not sure if this is the best approach, we should be checking whether an individual class
+    // has a greater than 0.5 chance of being true.
+    if ((arr.reduce((x, a) => x + a, 0)) > 0) {  
         problematic = true
     } else {
         problematic = false
