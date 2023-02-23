@@ -2,8 +2,7 @@
 .card {
     box-shadow: 3px 3px 10px #888;
     width: 35%;
-    margin-left: auto;
-    margin-right: 0;
+    padding-right: 30px;
     font-family: Arial, Helvetica, sans-serif;
     z-index: 2000000;
     position: absolute;
@@ -21,11 +20,21 @@
     margin-top: 30px;
     margin-bottom: 20px;
     margin-left: 25px;
+    color: black;
+    background-color: white;
+}
+.active, #collapsible:hover {
+    color: black;
+    background-color: white;
+    text-align: left;
 }
 #collapsible-content {
     display: none;  /* card content collapsed by default */
     overflow: hidden;
     margin-left: 32px;
+    color: black;
+    background-color: white;
+    text-align: left;
 }
 
 

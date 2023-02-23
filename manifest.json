@@ -13,12 +13,12 @@
     {
         "matches": ["http://*/*"],
         "js": ["html/js/card.js"],
-        "css": ["html/css/main.css"]
+        "css": ["html/css/style-alpha.css"]
     },
     {
         "matches": ["https://*/*"],
         "js": ["html/js/card.js"],
-        "css": ["html/css/main.css"]
+        "css": ["html/css/style-alpha.css"]
     }
   ],
   "web_accessible_resources": [
