@@ -11,7 +11,7 @@
     top: 100px;
     background-color: white;
 }
-.collapsible {
+#collapsible {
     cursor: pointer;
     border: none;
     text-align: left;
@@ -22,7 +22,7 @@
     margin-bottom: 20px;
     margin-left: 25px;
 }
-.collapsible-content {
+#collapsible-content {
     display: none;  /* card content collapsed by default */
     overflow: hidden;
     margin-left: 32px;

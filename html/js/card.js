@@ -76,6 +76,16 @@ async function loadOverlay() {
         document.getElementById('links-text').innerHTML = link
         document.getElementById('pitfalls-text').innerHTML = txt
         document.getElementById('links-title').innerHTML = "&#9989 Sources we recommend reading"
+
+        // collapsible card content
+        document.getElementById("collapsible").addEventListener('click', function (e) {
+            const content = document.getElementById("collapsible-content");
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+        })
     } else {
         document.getElementById('title').innerHTML = "Nothing to report!"
         document.getElementById('pitfalls-title').innerHTML = ""
