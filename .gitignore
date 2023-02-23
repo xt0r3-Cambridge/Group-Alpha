@@ -271,8 +271,7 @@ tags
 .DS_Store
 
 # Ignore model data
-**/test_trainer
-**/bert-finetuned-multi-label-ai-hype
+**/aihype*
 
 # Ignore one-vs-rest classifier
 model/*-vs-rest/
