@@ -104,7 +104,7 @@
         "Food production increased and waste reduced by AI-assisted precision agriculture",
         "Artificial organs created by AI-driven bioprinting"
     ],
-    "humanComparison": [
+    "comparisonWithHumanSkills": [
         "AI surpasses human intelligence in language understanding",
         "AI beats humans in complex problem-solving tasks",
         "AI demonstrates greater accuracy than human experts in medical diagnosis",
@@ -249,7 +249,7 @@
         "Robotic technology is the future of mental health technology, making mental wellness more accessible and effective.",
         "Advanced automation is the key to resolving the waste management crisis, making resource management more sustainable and efficient."
     ],
-    "historyComparison": [
+    "uncriticalHistoryComparison": [
         "AI revolution will change the world just like the industrial revolution did",
         "AI is the new electricity: powering the future",
         "AI: the next big thing since the invention of the wheel",
@@ -360,7 +360,7 @@
         "The Convergence of AI and Quantum Computing: A New Era of Innovation",
         "The Intersection of AI and Climate Change: A Path to a Sustainable Future."
     ],
-    "unjustClaims": [
+    "unjustifiedClaimsAboutFuture": [
         "AI to revolutionize healthcare, making doctors obsolete",
         "AI to take over all jobs in the next decade",
         "AI to solve world hunger by the end of the year",
@@ -462,7 +462,7 @@
         "AI-based innovations are expected to create a new form of government that will be more efficient and just than anything we have now.",
         "New forms of energy will be discovered and all our problems will be solved with the help of Artificial Intelligence according to some experts."
     ],
-    "deepSounding": [
+    "deepSoundingTermsForBanalities": [
         "Revolutionary AI system invigorates office air conditioning",
         "Intelligent machine learning algorithms brew coffee",
         "Neural networks activate elevator button",
@@ -666,7 +666,7 @@
         "While AI has been able to improve logistics, some experts have raised concerns about its limitations in handling unexpected disruptions.",
         "Industry insiders have noted that while AI has been able to improve manufacturing, there are still limitations in its ability to handle errors and mistakes."
     ],
-    "deEmphasize": [
+    "deEmphasizingLimitations": [
         "AI making huge strides in improving efficiency",
         "AI helping humans achieve more in less time",
         "AI transforming industries with increased productivity",
@@ -793,7 +793,7 @@
         "Cognitive computing is improving the accuracy and speed of medical diagnoses.",
         "Artificial neural networks are transforming the field of renewable energy."
     ],
-    "performanceNumber": [
+    "performanceNumbersWithoutCaveats": [
         "AI achieves record accuracy in image classification",
         "New AI tool delivers 99% success rate in predicting disease",
         "AI system outperforms human experts in detecting fraud",
@@ -895,7 +895,7 @@
         "Reduced carbon emissions through the use of AI in the transportation industry.",
         "Enhanced firefighting response times through the use of automated intelligence."
     ],
-    "inscrutable": [
+    "inscrutability": [
         "New AI technology remains a mystery to experts",
         "AI system makes decisions without explanation",
         "Experts struggle to understand inner workings of advanced AI technology",
