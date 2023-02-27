@@ -275,3 +275,6 @@ tags
 
 # Ignore one-vs-rest classifier
 model/*-vs-rest/
+
+# Ignore archive files
+**/archive
