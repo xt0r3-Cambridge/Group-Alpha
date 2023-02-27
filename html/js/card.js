@@ -6,6 +6,28 @@ var baseline_arr
 var complex_arr
 var threshold = 0.700
 
+const OrderEnum = Object.freeze({
+    "agency": 0,
+    "suggestiveImagery": 1,
+    "comparisonWithHumanIntelligence": 2,
+    "comparisonWithHumanSkills": 3,
+    "hyperbole": 4,
+    "uncriticalHistoryComparison": 5,
+    "unjustifiedClaimsAboutFuture": 6,
+    "falseClaimsAboutProgress": 7,
+    "incorrectClaimsAboutStudyReport": 8,
+    "deepSoundingTermsForBanalities": 9,
+    "treatingSpokespeopleAsNeutral": 10,
+    "repeatingPRTerms": 11,
+    "noDiscussionOfLimitations": 12,
+    "deEmphasizingLimitations": 13,
+    "limitationsAddressedBySkeptics": 14,
+    "downplayingHumanLabour": 15,
+    "performanceNumbersWithoutCaveats": 16,
+    "inscrutability": 17,
+})
+
+
 const links = [
     ["Attributing agency to AI - describing AI systems as taking actions independent of human supervision or implying that they may soon be able to do so.", "<a href='https://www.aimyths.org/ai-has-agency'>Agency</a>"],
     ["Using suggestive imagery to portray AI as humanoid robots - giving readers a false impression that AI tools are embodied, even when it is just software that learns patterns from data.", "<a href='https://betterimagesofai.org/'>Imagery</a>"],
@@ -27,13 +49,13 @@ const links = [
 ]
 
 async function getProblematicArr(str) {
-    if(model == 0){
-        if(!baseline_arr){
+    if (model == 0) {
+        if (!baseline_arr) {
             baseline_arr = await runClassifier(str)
         }
         return baseline_arr
     } else {
-        if(!complex_arr){
+        if (!complex_arr) {
             complex_arr = await runClassifier(str)
         }
         return complex_arr
@@ -53,13 +75,57 @@ async function runClassifier(str) {
         let baseline = await import("/html/js/baseline.js");
         result = baseline.baseline(tags);
     } else { // AI Model
-        result = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        const response = await fetch("https://xt0r3-ai-hype-monitor.hf.space/run/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                data: [
+                    str,
+                ]
+            })
+        });
+
+        const respJson = await response.json();
+
+        const predictionArray = respJson.data;
+
+        result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        console.log(respJson)
+
+        if (!!predictionArray) {
+            console.log(predictionArray)
+            for (const predKey in predictionArray) {
+                const prediction = predictionArray[predKey]
+                console.log(prediction)
+                try {
+                    result[OrderEnum[prediction.label]] = prediction.confidences[0].confidence;
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+        }
+
+
+        // for (const prediction in respJson.data[0]) {
+        // try {
+        // console.log(result)
+        // console.log(prediction)
+        // console.log(respJson.data[0])
+        // console.log(prediction.label)
+        // console.log(OrderEnum[prediction.label])
+        // result[OrderEnum[prediction.label]] = prediction.confidences[0].confidence;
+        // } catch (e) {
+        // console.log(e);
+        // }
+        // }
+
     }
     return result;
 }
 
 async function forceUpdateOverlay(arr) {
-    if ((arr.reduce((x, a) => x + a, 0)) > 0) {  
+    if ((arr.reduce((x, a) => x + a, 0)) > 0) {
         problematic = true
     } else {
         problematic = false
@@ -103,7 +169,7 @@ async function loadOverlay() {
     var arr = await getProblematicArr(null);
     // I'm (Sam) not sure if this is the best approach, we should be checking whether an individual class
     // has a greater than 0.5 chance of being true.
-    await forceUpdateOverlay(arr);   
+    await forceUpdateOverlay(arr);
 }
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
@@ -123,7 +189,7 @@ if (testButton != null) {
         console.log("Text: " + text);
         let array = await runClassifier(text);
         forceUpdateOverlay(array);
-    }); 
+    });
 }
 
 
