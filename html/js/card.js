@@ -75,6 +75,7 @@ async function runClassifier(str) {
         let baseline = await import("/html/js/baseline.js");
         result = baseline.baseline(tags);
     } else { // AI Model
+<<<<<<< HEAD
         const response = await fetch("https://xt0r3-ai-hype-monitor.hf.space/run/predict", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -101,6 +102,9 @@ async function runClassifier(str) {
                 }
             }
         }
+=======
+        result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+>>>>>>> 51d215f (added prescreen function)
     }
     return result;
 }
@@ -173,13 +177,29 @@ if (testButton != null) {
     });
 }
 
-
-fetch(chrome.runtime.getURL('/html/card.html')).then(r => r.text()).then(html => {
-    document.body.insertAdjacentHTML('afterbegin', html);
-}).then(r => {
-    chrome.storage.sync.get().then(items => {
-        model = items.model
-        loadOverlay()
-    })
+async function preScreen() {
+    var found = false
+    var tags
+    var rUrl = chrome.runtime.getURL('/html/js/keywords.json');
+    const res = await fetch(rUrl)
+    const resp = await res.json()
+    var scrape = await import("/html/js/scrape.js");
+    tags = scrape.getTokenizedPTags();
+    found = resp.some(r => tags.includes(r))
+    console.log(found)
+    return found
 }
-);
+preScreen().then(x => {
+    if (x) {
+        fetch(chrome.runtime.getURL('/html/card.html')).then(r => r.text()).then(html => {
+            document.body.insertAdjacentHTML('afterbegin', html);
+        }).then(r => {
+
+            chrome.storage.sync.get().then(items => {
+                model = items.model
+                loadOverlay()
+            })
+        }
+        )
+    };
+})
