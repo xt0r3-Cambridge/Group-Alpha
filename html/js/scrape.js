@@ -1,5 +1,3 @@
-
-
 export function getPTags() {
   const elements = document.querySelectorAll("p");
   var pTags = "";

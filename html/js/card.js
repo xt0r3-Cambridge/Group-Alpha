@@ -1,3 +1,5 @@
+"use strict";
+
 var problematic = false
 var model = 0
 var baseline_arr
@@ -24,23 +26,27 @@ const links = [
     ["<p>Describing AI as black boxes - shifting accountability for AI tools from developers to the underlying technology, ignoring a lot of research on model interpretability and explainability.", "<a href='https://royalsocietypublishing.org/doi/epdf/10.1098/rsta.2018.0084'>The Fallacy of Inscrutability</a>"]
 ]
 
-async function getProblematicArr() {
+async function getProblematicArr(str) {
     if(model == 0){
         if(!baseline_arr){
-            baseline_arr = await runClassifier()
+            baseline_arr = await runClassifier(str)
         }
         return baseline_arr
     } else {
         if(!complex_arr){
-            complex_arr = await runClassifier()
+            complex_arr = await runClassifier(str)
         }
         return complex_arr
     }
 }
 
-async function runClassifier() {
+async function runClassifier(str) {
     let scrape = await import("/html/js/scrape.js");
-    let tags = scrape.getTokenizedPTags();
+    console.log(str);
+    let tags;
+    if (str === null) { tags = scrape.getTokenizedPTags(); console.log("test"); }
+    else { tags = str.split(" "); }
+    console.log("Tags: " + tags);
     var result
     if (model == 0) { // Keyword Model
         console.log("baseline");
@@ -52,11 +58,7 @@ async function runClassifier() {
     return result;
 }
 
-async function loadOverlay() {
-    var arr = await getProblematicArr();
-    console.log(arr)
-    // I'm not sure if this is the best approach, we should be checking whether an individual class
-    // has a greater than 0.5 chance of being true.
+async function forceUpdateOverlay(arr) {
     if ((arr.reduce((x, a) => x + a, 0)) > 0) {  
         problematic = true
     } else {
@@ -97,6 +99,13 @@ async function loadOverlay() {
     }
 }
 
+async function loadOverlay() {
+    var arr = await getProblematicArr(null);
+    // I'm (Sam) not sure if this is the best approach, we should be checking whether an individual class
+    // has a greater than 0.5 chance of being true.
+    await forceUpdateOverlay(arr);   
+}
+
 chrome.storage.onChanged.addListener((changes, namespace) => {
     console.log(Object.entries(changes))
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
@@ -106,6 +115,17 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         }
     }
 });
+
+let testButton = document.getElementById("test-button");
+if (testButton != null) {
+    testButton.addEventListener("click", async () => {
+        let text = document.getElementById("text-box").value;
+        console.log("Text: " + text);
+        let array = await runClassifier(text);
+        forceUpdateOverlay(array);
+    }); 
+}
+
 
 fetch(chrome.runtime.getURL('/html/card.html')).then(r => r.text()).then(html => {
     document.body.insertAdjacentHTML('afterbegin', html);
