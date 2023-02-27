@@ -4,7 +4,7 @@
   "version": "0.1",
   "description": "An addon for detecting overhype about AI in articles or social media",
   "icons": {
-  },
+  },  
   "action": {
     "popup": "html/popup.html",
     "default_popup": "html/popup.html"

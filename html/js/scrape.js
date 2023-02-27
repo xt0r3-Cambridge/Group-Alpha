@@ -10,7 +10,7 @@ export function getPTags() {
 }
 
 export function getTokenizedPTags() {
-  const elements = document.querySelectorAll("p");
+  const elements = document.querySelectorAll("p, div");
   const pTags = [];
   for (const element of elements) {
     let split = element.textContent.trim().split(/\s+/);
@@ -19,4 +19,8 @@ export function getTokenizedPTags() {
     }
   }
   return pTags;
+}
+
+export function applyToText(str) {
+  return str.trim().split(/\s+/);
 }
