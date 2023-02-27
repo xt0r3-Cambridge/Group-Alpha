@@ -87,39 +87,20 @@ async function runClassifier(str) {
 
         const respJson = await response.json();
 
-        const predictionArray = respJson.data;
+        const predictionArray = respJson.data[0].confidences;
 
         result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-        console.log(respJson)
-
         if (!!predictionArray) {
-            console.log(predictionArray)
             for (const predKey in predictionArray) {
                 const prediction = predictionArray[predKey]
-                console.log(prediction)
                 try {
-                    result[OrderEnum[prediction.label]] = prediction.confidences[0].confidence;
+                    result[OrderEnum[prediction.label]] = prediction.confidence;
                 } catch (e) {
                     console.log(e);
                 }
             }
         }
-
-
-        // for (const prediction in respJson.data[0]) {
-        // try {
-        // console.log(result)
-        // console.log(prediction)
-        // console.log(respJson.data[0])
-        // console.log(prediction.label)
-        // console.log(OrderEnum[prediction.label])
-        // result[OrderEnum[prediction.label]] = prediction.confidences[0].confidence;
-        // } catch (e) {
-        // console.log(e);
-        // }
-        // }
-
     }
     return result;
 }
