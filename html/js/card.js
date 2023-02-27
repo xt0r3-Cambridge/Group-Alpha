@@ -75,7 +75,6 @@ async function runClassifier(str) {
         let baseline = await import("/html/js/baseline.js");
         result = baseline.baseline(tags);
     } else { // AI Model
-<<<<<<< HEAD
         const response = await fetch("https://xt0r3-ai-hype-monitor.hf.space/run/predict", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -102,9 +101,6 @@ async function runClassifier(str) {
                 }
             }
         }
-=======
-        result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
->>>>>>> 51d215f (added prescreen function)
     }
     return result;
 }
