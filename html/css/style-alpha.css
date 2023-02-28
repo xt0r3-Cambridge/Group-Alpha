@@ -1,5 +1,5 @@
 /* card.html */
-.card {
+#card {
     box-shadow: 3px 3px 10px #888;
     width: 30%;
     padding-right: 30px;
@@ -95,7 +95,15 @@ input[type=radio] {
     left: 50%;
     top: 40%;
 }
-
+#card-style-reset {
+    background-color: rgba(51, 51, 51, 0.05);
+    border-radius: 5px;
+    border: none;
+    color: #333333;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 3px 8px;
+}
 
 /* about.html */
 h1 {

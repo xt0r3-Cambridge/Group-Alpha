@@ -5,6 +5,8 @@ var model = 0
 var baseline_arr
 var complex_arr
 var threshold = 0.700
+let card = null;
+let content = null;
 
 const OrderEnum = Object.freeze({
     "agency": 0,
@@ -127,8 +129,6 @@ async function forceUpdateOverlay(arr) {
         document.getElementById('links-text').innerHTML = link
         document.getElementById('pitfalls-text').innerHTML = txt
         document.getElementById('links-title').innerHTML = "&#9989 Sources we recommend reading"
-
-        // collapsible card content
     } else {
         document.getElementById('title').innerHTML = "Nothing to report!"
         document.getElementById('pitfalls-title').innerHTML = ""
@@ -155,9 +155,15 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
         if (key == "model") {
             model = newValue
-            loadOverlay()
+        } else if (key === "right") {
+            card.style.right = newValue;
+        } else if (key === "top") {
+            card.style.top = newValue;
+        } else if (key === "display") {
+            content.style.display = newValue;
         }
     }
+    loadOverlay()
 });
 
 let testButton = document.getElementById("test-button");
@@ -214,17 +220,48 @@ preScreen().then(x => {
     if (x && testButton == null) {
         fetch(chrome.runtime.getURL('/html/card.html')).then(r => r.text()).then(html => {
             document.body.insertAdjacentHTML('afterbegin', html);
-            document.getElementById("collapsible").addEventListener('click', function (e) {
-                const content = document.getElementById("collapsible-content");
-                if (content.style.display === "block") {
-                    content.style.display = "none";
-                } else {
-                    content.style.display = "block";
-                }
-            })
+
+            // draggable card
+            card = document.getElementById("card");
+            content = document.getElementById("collapsible-content");
+            document.getElementById("collapsible").onmousedown = function (e) {
+                let x = e.clientX, y = e.clientY;  // current cursor position
+                const initLeft = card.offsetLeft, initTop = card.offsetTop;  // initial card position
+                document.onmousemove = function (e) {
+                    let dx = e.clientX - x;
+                    let dy = e.clientY - y;
+                    // update cursor position
+                    x += dx
+                    y += dy;
+                    // update card position
+                    card.style.right = (window.innerWidth - card.offsetLeft - card.offsetWidth - dx) + "px";
+                    card.style.top = (card.offsetTop + dy) + "px";
+                };
+                document.onmouseup = function (e) {
+                    document.onmouseup = null;
+                    document.onmousemove = null;
+                    // a mouse click without dragging should toggle collapsing / expanding the card content
+                    if (card.offsetLeft === initLeft && card.offsetTop === initTop) {
+                        // collapsible card content
+                        const content = document.getElementById("collapsible-content");
+                        if (content.style.display === "block") {
+                            content.style.display = "none";
+                        } else {
+                            content.style.display = "block";
+                        }
+                        chrome.storage.sync.set({"display": content.style.display});
+                    } else {
+                        chrome.storage.sync.set({"right": (window.innerWidth - card.offsetLeft - card.offsetWidth) + "px"});
+                        chrome.storage.sync.set({"top": card.offsetTop + "px"});
+                    }
+                };
+            };
         }).then(r => {
             chrome.storage.sync.get().then(items => {
-                model = items.model
+                model = items.model;
+                card.style.top = items.top;
+                card.style.right = items.right;
+                content.style.display = items.display;
                 loadOverlay()
             })
         }

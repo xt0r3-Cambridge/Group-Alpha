@@ -26,3 +26,9 @@ document.getElementById('ai-model').addEventListener("click", function (e) {
 document.getElementById("about").addEventListener('click', function (e) {
     chrome.tabs.create({url: e.target.href});
 })
+
+document.getElementById("card-style-reset").addEventListener('click', function (e) {
+    chrome.storage.sync.set({"right": "10px"});
+    chrome.storage.sync.set({"top": "100px"});
+    chrome.storage.sync.set({"display" : "none"})
+})
