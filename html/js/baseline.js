@@ -62,7 +62,7 @@ function findNearbyTokens(keywords,distance,tokens) {
                     watchlist[k][3] -= 1;                   //else distance reduces by one
                 }
             }
-            //TODO -> optional: set all with the same keywordIndex to 0.
+           
         }
         //TODO -> optional: remove finished watchlist entries.
     }
@@ -105,24 +105,24 @@ export function baseline(tokens){
     let decision = new Array(18).fill(0);
     let pitfalls = new Array(18);
 
-    pitfalls[0] = new Pitfall(["Attributing agency to AI",[['TAKE','OVER'],['TAKING','OVER'],['AI','INDEPENDENCE'],['FIGHTING','AGAINST'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING'],['IT','AUTOCOMPLETED']],[1,1,6,3,1,1],0]);
-    pitfalls[1] = new Pitfall(["Suggestive imagery",[],[],0]);
-    pitfalls[2] = new Pitfall(["Comparison with human intelligence",[["HUMAN","INTELLIGENCE"],['SENTIENT']],[1,0],0]);
-    pitfalls[3] = new Pitfall(["Comparison with human skills",[['AS','EFFECTIVE'],['AS','SUCCESSFULLY']],[1,1],0]);
-    pitfalls[4] = new Pitfall(['Hyperbole',[['REVOLUTIONARY'],['GROUNDBREAKING']],[0,0],0]);
-    pitfalls[5] = new Pitfall(['Uncritical comparison with historical transformations',[['MORE','CONSEQUENTIAL'],['REVOLUTION'],['NEW','COLONIAL'],['NEW','WORLD','ORDER']],[1,0,2,3],0]);
-    pitfalls[6] = new Pitfall(['Unjustified claims about future progress',[['WILL','BE','USEFUL'],['BECOME','ESSENTIAL'],['BECOME','USEFUL'],['EVENTUALLY','DEVELOP']],[1,4,4,4],0]);
-    pitfalls[7] = new Pitfall(['False claims about progress',[['TEACHES','ITSELF'],['BECOMES','INDEPENDENT']],[1,5],0]);
-    pitfalls[8] = new Pitfall(['Incorrect claims about what a study reports',[],[],0]);
-    pitfalls[9] = new Pitfall(['Deep-sounding terms for banal actions',[['MAGIC','AI'],['ELEMENTAL'],['GODS']],[5,0,0],0]);
-    pitfalls[10] = new Pitfall(['Treating company spokespeople and researchers as neutral parties',[],[],0]);
-    pitfalls[11] = new Pitfall(['Repeating or re-using PR terms and statements',[],[],0]);
-    pitfalls[12] = new Pitfall(['No discussion of potential limitations',[['INADEQUATE','VALIDATION'],['BIAS'],['PRIVACY','CONCERNS'],['LIMITATIONS']],[1,0,1,0],1]);
-    pitfalls[13] = new Pitfall(['Limitations de-emphasized',[['INADEQUATE','VALIDATION'],['BIAS'],['PRIVACY','CONCERNS'],['LIMITATIONS']],[1,0,1,0],0]);
-    pitfalls[14] = new Pitfall(['Limitations addressed in a "skeptics" framing',[['SKEPTICS'],['SOME ARGUE']],[0,1],0]);
-    pitfalls[15] = new Pitfall(['Downplaying human labor',[['HUMAN','LABOUR'],['HUMAN','LABOR'],['MANUAL'],['MANUAL','LABELLING']],[1,1,0,1],1]);
-    pitfalls[16] = new Pitfall(['Performance numbers reported without uncertainty estimation or caveats',[['ACCURACY','UNCERTAINTY'],['UNCERTAINTY','ACCURACY'],['ACCURACY','ERROR'],['ERROR','ACCURACY'],['PERFORMANCE','ERROR'],['ERROR','PERFORMANCE']],[8,8,8,8,8,8],1]);
-    pitfalls[17] = new Pitfall(['The fallacy inscrutability',[['IMPOSSIBLE','TO','UNDERSTAND'],['INSCRUTIBLE'],['CANNOT','UNDERSTAND'],['DON\'T','UNDERSTAND']],[1,0,1,1],0]);
+    pitfalls[0] = new Pitfall(["agency",[['TAKE','OVER'],['TAKING','OVER'],['AI','INDEPENDENCE'],['FIGHTING','AGAINST'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING'],['IT','AUTOCOMPLETED'],['ARTIFICIAL','INTELLIGENCE','INDEPENDENCE'],['AI','IS','CREATING'],['AI','HAS','CREATED'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING']],[1,1,6,3,1,1,1,1,1,1],0]);
+    pitfalls[1] = new Pitfall(["suggestiveImagery",[],[],0]);
+    pitfalls[2] = new Pitfall(["comparisonWithHumanIntelligence",[["HUMAN","INTELLIGENCE"],['SENTIENT']],[1,0],0]);
+    pitfalls[3] = new Pitfall(["comparisonWithHumanSkills",[['AS','EFFECTIVE'],['AS','SUCCESSFULLY']],[1,1],0]);
+    pitfalls[4] = new Pitfall(['hyperbole',[['REVOLUTIONARY'],['GROUNDBREAKING']],[0,0],0]);
+    pitfalls[5] = new Pitfall(['uncriticalHistoryComparison',[['MORE','CONSEQUENTIAL'],['REVOLUTION'],['NEW','COLONIAL'],['NEW','WORLD','ORDER']],[1,0,2,3],0]);
+    pitfalls[6] = new Pitfall(['unjustifiedClaimsAboutFuture',[['WILL','BE','USEFUL'],['BECOME','ESSENTIAL'],['BECOME','USEFUL'],['EVENTUALLY','DEVELOP'],['NEXT','BIG','BREAKTHROUGH'],['NEXT','BIG','THING']],[1,4,4,4,1,1],0]);
+    pitfalls[7] = new Pitfall(['falseClaimsAboutProgress',[['TEACHES','ITSELF'],['BECOMES','INDEPENDENT']],[1,5],0]);
+    pitfalls[8] = new Pitfall(['incorrectClaimsAboutStudyReport',[],[],0]);
+    pitfalls[9] = new Pitfall(['deepSoundingTermsForBanalities',[['MAGIC','AI'],['ELEMENTAL'],['GODS']],[5,0,0],0]);
+    pitfalls[10] = new Pitfall(['treatingSpokespeopleAsNeutral',[],[],0]);
+    pitfalls[11] = new Pitfall(['repeatingPRTerms',[],[],0]);
+    pitfalls[12] = new Pitfall(['noDiscussionOfLimitations',[['INADEQUATE','VALIDATION'],['BIAS'],['PRIVACY','CONCERNS'],['LIMITATIONS']],[1,0,1,0],1]);
+    pitfalls[13] = new Pitfall(['deEmphasizingLimitations',[['INADEQUATE','VALIDATION'],['BIAS'],['PRIVACY','CONCERNS'],['LIMITATIONS']],[1,0,1,0],0]);
+    pitfalls[14] = new Pitfall(['limitationsAddressedBySkeptics',[['SKEPTICS'],['SOME ARGUE']],[0,1],0]);
+    pitfalls[15] = new Pitfall(['downplayingHumanLabour',[['HUMAN','LABOUR'],['HUMAN','LABOR'],['MANUAL'],['MANUAL','LABELLING']],[1,1,0,1],1]);
+    pitfalls[16] = new Pitfall(['performanceNumbersWithoutCaveats',[['ACCURACY','UNCERTAINTY'],['UNCERTAINTY','ACCURACY'],['ACCURACY','ERROR'],['ERROR','ACCURACY'],['PERFORMANCE','ERROR'],['ERROR','PERFORMANCE']],[8,8,8,8,8,8],1]);
+    pitfalls[17] = new Pitfall(['inscrutability',[['IMPOSSIBLE','TO','UNDERSTAND'],['INSCRUTIBLE'],['CANNOT','UNDERSTAND'],['DON\'T','UNDERSTAND']],[1,0,1,1],0]);
 
     for(let i = 0;i<18;i++){
         let sum = pitfalls[i].identified(tokens).reduce(function (previousValue,currentValue){return previousValue + currentValue});
@@ -136,4 +136,4 @@ export function baseline(tokens){
 }
 
 // main(['take','over','and','eventually','could','develop',]);
-// up to ""
+// up to "AI has cracked a key   mathematical puzzle fo  runderstanding our world"
