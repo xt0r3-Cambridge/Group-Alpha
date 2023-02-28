@@ -157,6 +157,8 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
             model = newValue
         } else if (key === "right") {
             card.style.right = newValue;
+        } else if (key === "left") {
+            card.style.left = newValue;
         } else if (key === "top") {
             card.style.top = newValue;
         } else if (key === "display") {
@@ -225,17 +227,12 @@ preScreen().then(x => {
             card = document.getElementById("card");
             content = document.getElementById("collapsible-content");
             document.getElementById("collapsible").onmousedown = function (e) {
-                let x = e.clientX, y = e.clientY;  // current cursor position
                 const initLeft = card.offsetLeft, initTop = card.offsetTop;  // initial card position
                 document.onmousemove = function (e) {
-                    let dx = e.clientX - x;
-                    let dy = e.clientY - y;
-                    // update cursor position
-                    x += dx
-                    y += dy;
                     // update card position
-                    card.style.right = (window.innerWidth - card.offsetLeft - card.offsetWidth - dx) + "px";
-                    card.style.top = (card.offsetTop + dy) + "px";
+                    card.style.left = (card.offsetLeft + e.movementX) + "px";
+                    card.style.top = (card.offsetTop + e.movementY) + "px";
+                    console.log(window.innerWidth, card.offsetLeft, card.offsetWidth, e.movementX, e.movementY);
                 };
                 document.onmouseup = function (e) {
                     document.onmouseup = null;
@@ -243,7 +240,6 @@ preScreen().then(x => {
                     // a mouse click without dragging should toggle collapsing / expanding the card content
                     if (card.offsetLeft === initLeft && card.offsetTop === initTop) {
                         // collapsible card content
-                        const content = document.getElementById("collapsible-content");
                         if (content.style.display === "block") {
                             content.style.display = "none";
                         } else {
@@ -251,8 +247,7 @@ preScreen().then(x => {
                         }
                         chrome.storage.sync.set({"display": content.style.display});
                     } else {
-                        chrome.storage.sync.set({"right": (window.innerWidth - card.offsetLeft - card.offsetWidth) + "px"});
-                        chrome.storage.sync.set({"top": card.offsetTop + "px"});
+                        chrome.storage.sync.set({"left": card.offsetLeft + "px", "top": card.offsetTop + "px"});
                     }
                 };
             };
@@ -260,6 +255,7 @@ preScreen().then(x => {
             chrome.storage.sync.get().then(items => {
                 model = items.model;
                 card.style.top = items.top;
+                card.style.left = items.left;
                 card.style.right = items.right;
                 content.style.display = items.display;
                 loadOverlay()
