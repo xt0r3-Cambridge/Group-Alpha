@@ -29,6 +29,9 @@ function findNearbyTokens(keywords,distance,tokens) {
     if(keywords.length == 0){
         return [0];
     }
+    if(keywords.length != distance.length){
+        return Error;
+    }
     let watchlist = [];
     let keywordslen = keywords.length;
     for (let i = 0; i < keywordslen; i++){
@@ -105,24 +108,24 @@ export function baseline(tokens){
     let decision = new Array(18).fill(0);
     let pitfalls = new Array(18);
 
-    pitfalls[0] = new Pitfall(["agency",[['TAKE','OVER'],['TAKING','OVER'],['AI','INDEPENDENCE'],['FIGHTING','AGAINST'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING'],['IT','AUTOCOMPLETED'],['ARTIFICIAL','INTELLIGENCE','INDEPENDENCE'],['AI','IS','CREATING'],['AI','HAS','CREATED'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING']],[1,1,6,3,1,1,1,1,1,1],0]);
+    pitfalls[0] = new Pitfall(["agency",[['TAKE','OVER'],['TAKING','OVER'],['AI','INDEPENDENCE'],['FIGHTING','AGAINST'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING'],['IT','AUTOCOMPLETED'],['ARTIFICIAL','INTELLIGENCE','INDEPENDENCE'],['AI','IS','CREATING'],['AI','HAS','CREATED'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING'],['AI','GETTING','SMARTER'],['ARTIFICIAL','INTELLIGENCE','GETTING','SMARTER'],['AI','REASON'],['ARTIFICIAL','INTELLIGENCE','REASON'],['TAUGHT','ITSELF']],[1,1,6,3,1,1,1,1,1,1,2,2,4,4,1],0]);
     pitfalls[1] = new Pitfall(["suggestiveImagery",[],[],0]);
-    pitfalls[2] = new Pitfall(["comparisonWithHumanIntelligence",[["HUMAN","INTELLIGENCE"],['SENTIENT']],[1,0],0]);
-    pitfalls[3] = new Pitfall(["comparisonWithHumanSkills",[['AS','EFFECTIVE'],['AS','SUCCESSFULLY']],[1,1],0]);
-    pitfalls[4] = new Pitfall(['hyperbole',[['REVOLUTIONARY'],['GROUNDBREAKING']],[0,0],0]);
+    pitfalls[2] = new Pitfall(["comparisonWithHumanIntelligence",[["HUMAN","INTELLIGENCE"],['SENTIENT'],['AI','LEARNING'],['ARTIFICIAL','INTELLIGENCE','LEARNING'],['AI','LEARNS'],['ARTIFICIAL','INTELLIGENCE','LEARNS'],['AI','INSPIRED','LEARN'],['ARTIFICIAL','INTELLIGENCE','LEARN'],['TEACHING','AI'],['TEACHING','ARTIFICIAL','INTELLIGENCE']],[1,0,2,2,2,2,4,4,1,1],0]);
+    pitfalls[3] = new Pitfall(["comparisonWithHumanSkills",[['AS','EFFECTIVE'],['AS','SUCCESSFULLY'],['ARTIFICIAL','INTELLIGENCE','SMARTER'],['AI','SMARTER']],[1,1,3,3],0]);
+    pitfalls[4] = new Pitfall(['hyperbole',[['REVOLUTIONARY'],['GROUNDBREAKING'],['MILLIONS','OF'],['MILLION'],['AI','SWOOPS'],['AI','SWOOPING'],['ARTIFICIAL','INTELLIGENCE','SWOOPS'],['ARTIFICIAL','INTELLIGENCE','SWOOPING'],['BEST','IN','THE','WORLD'],['TAUGHT','ITSELF']],[0,0,1,0,3,3,3,3,1,1],0]);
     pitfalls[5] = new Pitfall(['uncriticalHistoryComparison',[['MORE','CONSEQUENTIAL'],['REVOLUTION'],['NEW','COLONIAL'],['NEW','WORLD','ORDER']],[1,0,2,3],0]);
     pitfalls[6] = new Pitfall(['unjustifiedClaimsAboutFuture',[['WILL','BE','USEFUL'],['BECOME','ESSENTIAL'],['BECOME','USEFUL'],['EVENTUALLY','DEVELOP'],['NEXT','BIG','BREAKTHROUGH'],['NEXT','BIG','THING']],[1,4,4,4,1,1],0]);
-    pitfalls[7] = new Pitfall(['falseClaimsAboutProgress',[['TEACHES','ITSELF'],['BECOMES','INDEPENDENT']],[1,5],0]);
-    pitfalls[8] = new Pitfall(['incorrectClaimsAboutStudyReport',[],[],0]);
-    pitfalls[9] = new Pitfall(['deepSoundingTermsForBanalities',[['MAGIC','AI'],['ELEMENTAL'],['GODS']],[5,0,0],0]);
-    pitfalls[10] = new Pitfall(['treatingSpokespeopleAsNeutral',[],[],0]);
+    pitfalls[7] = new Pitfall(['falseClaimsAboutProgress',[['TEACHES','ITSELF'],['BECOMES','INDEPENDENT'],['SAVE','THE','WORLD']],[1,5,1],0]);
+    pitfalls[8] = new Pitfall(['incorrectClaimsAboutStudyReport',[['STUDY']],[1],0]);
+    pitfalls[9] = new Pitfall(['deepSoundingTermsForBanalities',[['MAGIC','AI'],['ELEMENTAL'],['GODS'],['SECRETIVE']],[5,0,0,0],0]);
+    pitfalls[10] = new Pitfall(['treatingSpokespeopleAsNeutral',[['SPOKESPERSON']],[0],0]);
     pitfalls[11] = new Pitfall(['repeatingPRTerms',[],[],0]);
     pitfalls[12] = new Pitfall(['noDiscussionOfLimitations',[['INADEQUATE','VALIDATION'],['BIAS'],['PRIVACY','CONCERNS'],['LIMITATIONS']],[1,0,1,0],1]);
     pitfalls[13] = new Pitfall(['deEmphasizingLimitations',[['INADEQUATE','VALIDATION'],['BIAS'],['PRIVACY','CONCERNS'],['LIMITATIONS']],[1,0,1,0],0]);
     pitfalls[14] = new Pitfall(['limitationsAddressedBySkeptics',[['SKEPTICS'],['SOME ARGUE']],[0,1],0]);
     pitfalls[15] = new Pitfall(['downplayingHumanLabour',[['HUMAN','LABOUR'],['HUMAN','LABOR'],['MANUAL'],['MANUAL','LABELLING']],[1,1,0,1],1]);
     pitfalls[16] = new Pitfall(['performanceNumbersWithoutCaveats',[['ACCURACY','UNCERTAINTY'],['UNCERTAINTY','ACCURACY'],['ACCURACY','ERROR'],['ERROR','ACCURACY'],['PERFORMANCE','ERROR'],['ERROR','PERFORMANCE']],[8,8,8,8,8,8],1]);
-    pitfalls[17] = new Pitfall(['inscrutability',[['IMPOSSIBLE','TO','UNDERSTAND'],['INSCRUTIBLE'],['CANNOT','UNDERSTAND'],['DON\'T','UNDERSTAND']],[1,0,1,1],0]);
+    pitfalls[17] = new Pitfall(['inscrutability',[['IMPOSSIBLE','TO','UNDERSTAND'],['INSCRUTIBLE'],['CANNOT','UNDERSTAND'],['DON\u2019T','UNDERSTAND']],[1,0,1,1],0]);
 
     for(let i = 0;i<18;i++){
         let sum = pitfalls[i].identified(tokens).reduce(function (previousValue,currentValue){return previousValue + currentValue});
