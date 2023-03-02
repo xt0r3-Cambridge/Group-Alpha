@@ -1,8 +1,8 @@
 export function getPTags() {
-  const elements = document.querySelectorAll("p");
-  let pTags = "";
+  const elements = document.querySelectorAll("p, div");
+  const pTags = [];
   for (const element of elements) {
-    pTags += (element.textContent.trim()+"\n");
+    pTags.push(element.textContent.trim());
   }
   return pTags;
 }
@@ -23,10 +23,7 @@ export function getPTagsAsString() {
   const elements = document.querySelectorAll("p, div");
   let pTags = "";
   for (const element of elements) {
-    let split = element.textContent.trim().split(/\s+/);
-    for (const i of split) { // Flatten
-      pTags +=i;
-    }
+    pTags += (element.textContent.trim()+"\n");
   }
   return pTags;
 }
