@@ -232,7 +232,6 @@ preScreen().then(x => {
                     // update card position
                     card.style.left = (card.offsetLeft + e.movementX) + "px";
                     card.style.top = (card.offsetTop + e.movementY) + "px";
-                    console.log(window.innerWidth, card.offsetLeft, card.offsetWidth, e.movementX, e.movementY);
                 };
                 document.onmouseup = function (e) {
                     document.onmouseup = null;
@@ -247,7 +246,7 @@ preScreen().then(x => {
                         }
                         chrome.storage.sync.set({"display": content.style.display});
                     } else {
-                        chrome.storage.sync.set({"left": card.offsetLeft + "px", "top": card.offsetTop + "px"});
+                        chrome.storage.sync.set({"left": card.offsetLeft + "px", "right": "auto", "top": card.offsetTop + "px"});
                     }
                 };
             };
