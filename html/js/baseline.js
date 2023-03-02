@@ -105,14 +105,15 @@ class Pitfall{
 
 
 export function baseline(tokens){
+//function baseline(tokens){
     let decision = new Array(18).fill(0);
     let pitfalls = new Array(18);
 
-    pitfalls[0] = new Pitfall(["agency",[['TAKE','OVER'],['TAKING','OVER'],['AI','INDEPENDENCE'],['FIGHTING','AGAINST'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING'],['IT','AUTOCOMPLETED'],['ARTIFICIAL','INTELLIGENCE','INDEPENDENCE'],['AI','IS','CREATING'],['AI','HAS','CREATED'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING'],['AI','GETTING','SMARTER'],['ARTIFICIAL','INTELLIGENCE','GETTING','SMARTER'],['AI','REASON'],['ARTIFICIAL','INTELLIGENCE','REASON'],['TAUGHT','ITSELF'],['COMING','FOR','YOU'],['BAD','AI']],[1,1,6,3,1,1,1,1,1,1,2,2,4,4,1,1,1],0]);
+    pitfalls[0] = new Pitfall(["agency",[['TAKE','OVER'],['TAKING','OVER'],['AI','INDEPENDENCE'],['FIGHTING','AGAINST'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING'],['IT','AUTOCOMPLETED'],['ARTIFICIAL','INTELLIGENCE','INDEPENDENCE'],['AI','IS','CREATING'],['AI','HAS','CREATED'],['ARTIFICIAL','INTELLIGENCE','IS','CREATING'],['AI','GETTING','SMARTER'],['ARTIFICIAL','INTELLIGENCE','GETTING','SMARTER'],['AI','REASON'],['ARTIFICIAL','INTELLIGENCE','REASON'],['TAUGHT','ITSELF'],['COMING','FOR','YOU'],['BAD','AI'],['ALGORITHMS','LEARN'],['ALGORITHM','LEARNS']],[1,1,6,3,1,1,1,1,1,1,2,2,4,4,1,1,1,3,3],0]);
     pitfalls[1] = new Pitfall(["suggestiveImagery",[],[],0]);
-    pitfalls[2] = new Pitfall(["comparisonWithHumanIntelligence",[["HUMAN","INTELLIGENCE"],['SENTIENT'],['AI','LEARNING'],['ARTIFICIAL','INTELLIGENCE','LEARNING'],['AI','LEARNS'],['ARTIFICIAL','INTELLIGENCE','LEARNS'],['AI','INSPIRED','LEARN'],['ARTIFICIAL','INTELLIGENCE','LEARN'],['TEACHING','AI'],['TEACHING','ARTIFICIAL','INTELLIGENCE']],[1,0,2,2,2,2,4,4,1,1],0]);
+    pitfalls[2] = new Pitfall(["comparisonWithHumanIntelligence",[["HUMAN","INTELLIGENCE"],['SENTIENT'],['AI','LEARNING'],['ARTIFICIAL','INTELLIGENCE','LEARNING'],['AI','LEARNS'],['ARTIFICIAL','INTELLIGENCE','LEARNS'],['AI','INSPIRED','LEARN'],['ARTIFICIAL','INTELLIGENCE','LEARN'],['TEACHING','AI'],['TEACHING','ARTIFICIAL','INTELLIGENCE'],['MIMIC','US'],['MIMIC','OUR'],['MIMICS','US'],['MIMICS','OUR'],['JUST','LIKE','US'],['JUST','LIKE','WE','DO']],[1,0,2,2,2,2,4,4,1,1,1,1,1,1,1,1],0]);
     pitfalls[3] = new Pitfall(["comparisonWithHumanSkills",[['AS','EFFECTIVE'],['AS','SUCCESSFULLY'],['ARTIFICIAL','INTELLIGENCE','SMARTER'],['AI','SMARTER']],[1,1,3,3],0]);
-    pitfalls[4] = new Pitfall(['hyperbole',[['REVOLUTIONARY'],['GROUNDBREAKING'],['MILLIONS','OF'],['MILLION'],['AI','SWOOPS'],['AI','SWOOPING'],['ARTIFICIAL','INTELLIGENCE','SWOOPS'],['ARTIFICIAL','INTELLIGENCE','SWOOPING'],['BEST','IN','THE','WORLD'],['TAUGHT','ITSELF'],['IS','A','THREAT']],[0,0,1,0,3,3,3,3,1,1,1],0]);
+    pitfalls[4] = new Pitfall(['hyperbole',[['REVOLUTIONARY'],['GROUNDBREAKING'],['MILLIONS','OF'],['MILLION'],['AI','SWOOPS'],['AI','SWOOPING'],['ARTIFICIAL','INTELLIGENCE','SWOOPS'],['ARTIFICIAL','INTELLIGENCE','SWOOPING'],['BEST','IN','THE','WORLD'],['TAUGHT','ITSELF'],['IS','A','THREAT'],['WILL','CONTROL']],[0,0,1,0,3,3,3,3,1,1,1,1],0]);
     pitfalls[5] = new Pitfall(['uncriticalHistoryComparison',[['MORE','CONSEQUENTIAL'],['REVOLUTION'],['NEW','COLONIAL'],['NEW','WORLD','ORDER']],[1,0,2,3],0]);
     pitfalls[6] = new Pitfall(['unjustifiedClaimsAboutFuture',[['WILL','BE','USEFUL'],['BECOME','ESSENTIAL'],['BECOME','USEFUL'],['EVENTUALLY','DEVELOP'],['NEXT','BIG','BREAKTHROUGH'],['NEXT','BIG','THING']],[1,4,4,4,1,1],0]);
     pitfalls[7] = new Pitfall(['falseClaimsAboutProgress',[['TEACHES','ITSELF'],['BECOMES','INDEPENDENT'],['SAVE','THE','WORLD']],[1,5,1],0]);
@@ -138,5 +139,5 @@ export function baseline(tokens){
 
 }
 
-// main(['take','over','and','eventually','could','develop',]);
-// up to "IBM\u2019s photo-scraping scandal shows what a weird bubble AI researchers live in"
+//baseline(['take','over','and','eventually','could','develop',]);
+// up to "We tried teaching an AI to write Christmas movie plots. Hilarity ensued. Eventually.in"
