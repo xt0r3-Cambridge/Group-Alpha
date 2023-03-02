@@ -54,8 +54,6 @@ def twitter_scraper(query, num, name):
 
         the method returns both a json file("text": "content") and a csv file(this file contains more information about post text)
     """
-    # query: if you want to search by keyword, using a string, for example query = "keyword1 AND keyword2",
-    # if you want to add a time range, the example is query = "(keyword1 AND keyword2) since:2022-07-01 until: 2022-07-02"
 
     twitter_read(query, num, name)
     df = pd.read_csv(name + ".csv", encoding='unicode_escape')
