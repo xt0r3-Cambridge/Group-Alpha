@@ -1,10 +1,10 @@
 "use strict";
 
-var problematic = false
-var model = 0
-var baseline_arr
-var complex_arr
-var threshold = 0.700
+let problematic = false
+let model = 0
+let baseline_arr
+let complex_arr
+let threshold = 0.700
 let card = null;
 let content = null;
 
@@ -51,59 +51,101 @@ const links = [
 ]
 
 async function getProblematicArr(str) {
+    let scrape = await import("/html/js/scrape.js");
+    ``
+    if (str === "") return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    let tags = [];
+
+    console.log(tags)
+
     if (model == 0) {
         if (!baseline_arr || testButton != null) {
-            baseline_arr = await runClassifier(str)
+            if (str === null) { tags = scrape.getTokenizedPTags().concat(scrape.getTokenizedHTags()); console.log("test"); }
+            else { tags = str.split(" "); }
+            baseline_arr = await runClassifier(tags)
         }
         return baseline_arr
     } else {
         if (!complex_arr || testButton != null) {
-            complex_arr = await runClassifier(str)
+            if (str === null) { tags = scrape.getHTags(); console.log("test"); }
+            else { tags.push(str); console.log("TagFromString:" + tags) }
+            complex_arr = await runClassifier(tags)
         }
         return complex_arr
     }
 }
 
-async function runClassifier(str) {
-    let scrape = await import("/html/js/scrape.js");
-    if (str == "") return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    let tags;
-    if (str === null) { tags = scrape.getTokenizedPTags(); console.log("test"); }
-    else { tags = str.split(" "); }
+async function runClassifier(tags) {
+
     console.log("Tags: " + tags);
-    var result
+    let result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
     if (model == 0) { // Keyword Model
         console.log("baseline");
         let baseline = await import("/html/js/baseline.js");
         result = baseline.baseline(tags);
     } else { // AI Model
-        const response = await fetch("https://xt0r3-ai-hype-monitor.hf.space/run/predict", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                data: [
-                    str,
-                ]
+        console.log(tags)
+        const promises = tags.map((headline) => {
+            return fetch("https://xt0r3-ai-hype-monitor.hf.space/run/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    data: [
+                        headline,
+                    ]
+                })
+            }).then((response) => {
+                return response.json()
+            }).then((response) => {
+                console.log(response)
+                const predictionArray = response.data[0].confidences;
+
+                let predictions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+                if (!!predictionArray) {
+                    for (const predKey in predictionArray) {
+                        const prediction = predictionArray[predKey]
+                        try {
+                            predictions[OrderEnum[prediction.label]] = Math.max(predictions[OrderEnum[prediction.label]], prediction.confidence);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+                }
+
+                return predictions
             })
         });
 
-        const respJson = await response.json();
+        // TODO: make sure the requests get sent on normal pages too, not only on test pages.
+        // TODO: Make sure filtering works in a way we expect it to. Currently it doesn't 
 
-        const predictionArray = respJson.data[0].confidences;
+        console.log(promises)
 
-        result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        let resultsArray = await Promise.all(promises)
+        console.log(resultsArray)
 
-        if (!!predictionArray) {
-            for (const predKey in predictionArray) {
-                const prediction = predictionArray[predKey]
-                try {
-                    result[OrderEnum[prediction.label]] = prediction.confidence;
-                } catch (e) {
-                    console.log(e);
-                }
+        let maxResults = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        for (let j = 0; j <resultsArray.length; j++) {
+            const headlineResult = resultsArray[j]
+            for (let i = 0; i < headlineResult.length; i++) {
+                maxResults[i] = Math.max(maxResults[i], headlineResult[i])
             }
         }
+
+        console.log(maxResults)
+
+        result = maxResults
+        console.log("Not here")
+
+        console.log("I am here")
+        console.log(result)
+
+
     }
+
     return result;
 }
 
@@ -115,12 +157,12 @@ async function forceUpdateOverlay(arr) {
     }
 
     if (problematic) {
-        var filtered = links.filter((e, i) => arr[i] > 0)
-        var txt = ""
-        var link = ""
-        for (var i = 0; i < filtered.length; i++) {
+        let filtered = links.filter((e, i) => arr[i] > 0)
+        let txt = ""
+        let link = ""
+        for (let i = 0; i < filtered.length; i++) {
             txt += filtered[i][0] + "</br>"
-            for (var j = 1; j < filtered[i].length; j++) {
+            for (let j = 1; j < filtered[i].length; j++) {
                 link += filtered[i][j] + "</br>"
             }
         }
@@ -139,7 +181,7 @@ async function forceUpdateOverlay(arr) {
 }
 
 async function loadOverlay() {
-    var arr;
+    let arr;
     if (testButton != null) {
         let text = document.getElementById("text-box").value;
         arr = await getProblematicArr(text);
@@ -188,10 +230,10 @@ if (testButton != null) {
     }
     )
     testButton.addEventListener("click", async () => {
-        var text = document.getElementById("text-box").value
-        preScreen(text).then(x => {
-            if (x) {
-                runClassifier(text).then(array => {
+        let text = document.getElementById("text-box").value
+        preScreen(text).then(foundProblematicWord => {
+            if (foundProblematicWord) {
+                getProblematicArr(text).then(array => {
                     forceUpdateOverlay(array);
                 })
             }
@@ -199,21 +241,27 @@ if (testButton != null) {
     });
 }
 
+/**
+ * 
+ * @param {The string that we are looking to find int the list of tags, e.g. 'Machine Learning'} str 
+ * @param {The list of tags we are trying to search in, e.g. ['We', 'need', 'to', 'prevent', 'robot', 'uprising']} tags 
+ */
+function find(str, tags) {
+    strParts = str.split(" ")
+}
+
 async function preScreen(str) {
-    var found = false
-    var tags
-    var rUrl = chrome.runtime.getURL('/html/js/keywords.json');
+    let found = false
+    let tags
+    let rUrl = chrome.runtime.getURL('/html/js/keywords.json');
     const res = await fetch(rUrl)
     const resp = await res.json()
-    var scrape = await import("/html/js/scrape.js");
+    let scrape = await import("/html/js/scrape.js");
     if (str == null) {
-        tags = scrape.getTokenizedPTags();
-    } else {
-        tags = str.split(" ")
+        str = scrape.getPTagsAsString() + scrape.getHTagsAsString();
     }
     console.log(str)
-    console.log(tags)
-    found = resp.some(r => tags.includes(r))
+    found = resp.some(r => str.includes(r))
     console.log(found)
     return found
 }
@@ -244,9 +292,9 @@ preScreen().then(x => {
                         } else {
                             content.style.display = "block";
                         }
-                        chrome.storage.sync.set({"display": content.style.display});
+                        chrome.storage.sync.set({ "display": content.style.display });
                     } else {
-                        chrome.storage.sync.set({"left": card.offsetLeft + "px", "right": "auto", "top": card.offsetTop + "px"});
+                        chrome.storage.sync.set({ "left": card.offsetLeft + "px", "right": "auto", "top": card.offsetTop + "px" });
                     }
                 };
             };
