@@ -16,11 +16,11 @@ document.body.onload = function() {
 
 
 document.getElementById('keyword-model').addEventListener("click", function (e) {
-    chrome.storage.sync.set({"model": 0});
+    chrome.storage.sync.set({"model": 0, "card-display": "block"});  // redisplay card after model change
 })
 
 document.getElementById('ai-model').addEventListener("click", function (e) {
-    chrome.storage.sync.set({"model": 1});
+    chrome.storage.sync.set({"model": 1, "card-display": "block"});
 })
 
 document.getElementById("about").addEventListener('click', function (e) {
@@ -28,5 +28,5 @@ document.getElementById("about").addEventListener('click', function (e) {
 })
 
 document.getElementById("card-style-reset").addEventListener('click', function (e) {
-    chrome.storage.sync.set({"right": "10px", "left": "auto", "top": "100px", "display": "none"});
+    chrome.storage.sync.set({ "right": "10px", "left": "auto", "top": "100px", "content-display": "none", "card-display": "block" });
 })

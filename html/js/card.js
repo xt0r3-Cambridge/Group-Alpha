@@ -203,8 +203,10 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
             card.style.left = newValue;
         } else if (key === "top") {
             card.style.top = newValue;
-        } else if (key === "display") {
+        } else if (key === "content-display") {
             content.style.display = newValue;
+        } else if (key === "card-display") {
+            card.style.display = newValue;
         }
     }
     loadOverlay()
@@ -292,19 +294,25 @@ preScreen().then(x => {
                         } else {
                             content.style.display = "block";
                         }
-                        chrome.storage.sync.set({ "display": content.style.display });
+                        chrome.storage.sync.set({ "content-display": content.style.display });
                     } else {
                         chrome.storage.sync.set({ "left": card.offsetLeft + "px", "right": "auto", "top": card.offsetTop + "px" });
                     }
                 };
             };
+            // remove the card on click of the close button
+            document.getElementById("close").onclick = function (e) {
+                card.style.display = "none";
+                chrome.storage.sync.set({ "card-display" : "none" });
+            }
         }).then(r => {
             chrome.storage.sync.get().then(items => {
                 model = items.model;
                 card.style.top = items.top;
                 card.style.left = items.left;
                 card.style.right = items.right;
-                content.style.display = items.display;
+                content.style.display = items["content-display"];
+                // always redisplay card on page refresh, so do not sync card.style.display with storage here
                 loadOverlay()
             })
         }

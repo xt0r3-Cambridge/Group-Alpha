@@ -9,6 +9,18 @@
     top: 100px;
     background-color: white;
 }
+#close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    border: none;
+    background-color: white;
+    color: #888888;
+    font-size: 20px;
+}
+.active, #close:hover {
+    color: #333333;
+}
 #collapsible {
     cursor: pointer;
     border: none;
@@ -50,6 +62,7 @@
 .active, #collapsible:hover {
     color: black;
     background-color: white;
+    border: none;
     text-align: left;
 }
 #collapsible-content {
@@ -106,6 +119,8 @@ input[type=radio] {
     font-size: 11px;
     cursor: pointer;
     padding: 3px 8px;
+    /*position: absolute;*/
+    /*right: 30px;*/
 }
 
 /* about.html */
