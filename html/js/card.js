@@ -128,7 +128,7 @@ async function runClassifier(tags) {
 
         let maxResults = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-        for (let j = 0; j <resultsArray.length; j++) {
+        for (let j = 0; j < resultsArray.length; j++) {
             const headlineResult = resultsArray[j]
             for (let i = 0; i < headlineResult.length; i++) {
                 maxResults[i] = Math.max(maxResults[i], headlineResult[i])
@@ -150,20 +150,25 @@ async function runClassifier(tags) {
 }
 
 async function forceUpdateOverlay(arr) {
-    if ((arr.reduce((x, a) => x + a, 0)) > 0) {
-        problematic = true
-    } else {
-        problematic = false
+    console.log(arr)
+    let problematic = false
+    let filtered=[];
+    for(let i = 0; i<arr.length; i++){
+        if(arr[i]>0.5){
+            problematic = true
+            filtered.push([links[i], arr[i]])
+        }
     }
 
     if (problematic) {
-        let filtered = links.filter((e, i) => arr[i] > 0)
         let txt = ""
         let link = ""
+        console.log(filtered)
         for (let i = 0; i < filtered.length; i++) {
-            txt += filtered[i][0] + "</br>"
-            for (let j = 1; j < filtered[i].length; j++) {
-                link += filtered[i][j] + "</br>"
+            console.log(filtered[i])
+            txt += filtered[i][0][0] + (model == 1 ? "<p> Probability: " +  filtered[i][1] + "%</p>": "") + "</br></br>"
+            for (let j = 1; j < filtered[i][0].length; j++) {
+                link += filtered[i][0][j] + "</br></br>"
             }
         }
         document.getElementById('title').innerHTML = "This page appears to contain problematic metaphors about AI! &#128064"
