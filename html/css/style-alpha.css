@@ -1,5 +1,5 @@
 /* card.html */
-#card {
+#alpha-card #card {
     box-shadow: 3px 3px 10px #888;
     width: 32%;
     font-family: Arial, Helvetica, sans-serif;
@@ -9,7 +9,7 @@
     top: 100px;
     background-color: white;
 }
-#close {
+#alpha-card #close {
     position: absolute;
     right: 10px;
     top: 10px;
@@ -18,10 +18,10 @@
     color: #888888;
     font-size: 20px;
 }
-.active, #close:hover {
+#alpha-card .active, #close:hover {
     color: #333333;
 }
-#collapsible {
+#alpha-card #collapsible {
     cursor: pointer;
     border: none;
     text-align: left;
@@ -35,37 +35,37 @@
     background-color: white;
     padding-right: 30px;
 }
-.active, #collapsible:hover {
+#alpha-card .active, #collapsible:hover {
     color: black;
     background-color: white;
     border: none;
     text-align: left;
 }
 
-#pitfalls-title, #links-title {
+#alpha-card #pitfalls-title, #links-title {
     font-size: 14px !important;
     font-family: Arial, Helvetica, sans-serif !important;
     color: black !important;
 }
-.pitfalls-text{
+#alpha-card .pitfalls-text{
     font-size: 12px !important;
     font-family: Arial, Helvetica, sans-serif !important;
     color: black !important;
     line-height: 130% !important;
 }
-.links-text {
+#alpha-card .links-text {
     font-size: 12px !important;
     font-family: Arial, Helvetica, sans-serif !important;
     color: darkblue !important;
     text-decoration: darkblue !important;
 }
-#title {
+#alpha-card #title {
     font-size: 16px !important;
     font-family: Arial, Helvetica, sans-serif !important;
     color: black !important;
     font-weight: bold;
 }
-#collapsible-content {
+#alpha-card #collapsible-content {
     display: none;  /* card content collapsed by default */
     overflow: hidden;
     margin-left: 32px;
@@ -79,39 +79,39 @@
 
 
 /* popup.html */
-body {
+#alpha-popup body {
     font-family: Arial, Helvetica, sans-serif;
 }
-input[type=radio] {
+#alpha-popup input[type=radio] {
     border: 0;
     width: 100%;
     height: 2em;
 }
-.header {
+#alpha-popup .header {
     padding: 1px;
     text-align: center;
     color: white;
     width: 300px;
     background: cornflowerblue;
 }
-.model-options {
+#alpha-popup .model-options {
     display: flex;
     margin-left: 15px;
     margin-bottom: 15px;
 }
-.fixed {
+#alpha-popup .fixed {
     width: 70%;
 }
-.flex-item {
+#alpha-popup .flex-item {
     flex-grow: 1;
     position: relative;
 }
-.center {
+#alpha-popup .center {
     position: absolute;
     left: 50%;
     top: 40%;
 }
-#card-style-reset {
+#alpha-popup #card-style-reset {
     background-color: rgba(51, 51, 51, 0.05);
     border-radius: 5px;
     border: none;
@@ -122,34 +122,34 @@ input[type=radio] {
 }
 
 /* about.html */
-.about-h2 {
+#alpha-about .about-h2 {
     font-size: 20px
 }
-.about-h3 {
+#alpha-about .about-h3 {
     font-size: 16px;
 }
-.col-left {
+#alpha-about .col-left {
     float: left;
     width: 45%;
     margin: auto;
 }
-.col-right {
+#alpha-about .col-right {
     float: right;
     width: 45%;
     margin: auto;
 }
 /* clear floats after the columns */
-.row:after {
+#alpha-about .row:after {
     content: "";
     display: table;
     clear: both;
 }
 /* responsive columns */
 @media screen and (max-width: 600px) {
-    .col-left {
+    #alpha-about .col-left {
         width: 100%;
     }
-    .col-right {
+    #alpha-about .col-right {
         width: 100%;
     }
 }
