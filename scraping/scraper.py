@@ -251,5 +251,14 @@ def choose_website(website):
         with open('digitaltrends.json', 'w') as f:
             json.dump(scraping_urls_from_digital_trends(), f)
 
+    elif website == 'bbc':
+        with open('bbc.json', 'w') as f:
+            json.dump(scraping_urls_from_bbc(), f)
 
-choose_website("digitaltrends")
+    elif website == 'technologyreview_karen-hao':
+        with open('karen-hao.json', 'w') as f:
+            json.dump(scraping_urls_from_technology_review("https://www.technologyreview.com/author/karen-hao/"), f)
+
+    elif website == 'technologyreview_melissa_heikkila':
+        with open('melissa_heikkila.json', 'w') as f:
+            json.dump(scraping_urls_from_technology_review("https://www.technologyreview.com/author/melissa_heikkila/"), f)
