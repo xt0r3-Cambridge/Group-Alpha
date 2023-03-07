@@ -2,7 +2,6 @@
 
 let problematic = false
 let model = 0
-let baseline_arr
 let complex_arr
 let threshold = 0.700
 let card = null;
@@ -124,12 +123,12 @@ class Scraper {
         }
 
         // Filter for only headlines containing the keywords we need
-        this.headlineTags = await Keywords.filter([... new Set(this.scraper.getImportantLines())])
+        this.headlineTags = await Keywords.filter([... new Set(this.scraper.getImportantLines().map(line => Scraper.get().clean(line)))])
 
         // Doing filtering of articles in multiple steps,
         // as otherwise the process took too long and the site froze. 
         // Step 1: Get the lines beyond the headlines
-        const articleTagsNoLines = await Keywords.filter([...new Set(this.scraper.getTags(["p", "div"]))])
+        const articleTagsNoLines = await Keywords.filter([...new Set(this.scraper.getTags(["p", "div"]).map(tag => Scraper.get().clean(tag)))])
         // Step 2: Separate the lines
         const articleLines = await Keywords.filter(articleTagsNoLines.map(element => element.split('\n')).flat(1))
         // Step 3: Separate obvious sentences
@@ -142,6 +141,7 @@ class Scraper {
     static get = function () {
         return this.scraper
     }
+
 }
 
 /**
@@ -150,6 +150,7 @@ class Scraper {
  */
 class Baseline {
     static baseline = null
+    static problemPredictions = null
 
     static async init() {
         if (this.baseline == null) {
@@ -160,8 +161,108 @@ class Baseline {
     static get() {
         return this.baseline
     }
+
+    static async runClassifier(tags) {
+        let result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        if (tags.length == 0) {
+            return result
+        }
+
+        result = this.baseline.baseline(tags);
+
+        return result
+    }
 }
 
+/**
+ * Helper class to run the complex model
+ */
+class Complex {
+    static problemPredictions = null
+
+    static async runClassifier(tags) {
+        // Set the problem predictions to non-null empty value and incrementally update it
+        this.problemPredictions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        if (tags.length == 0) {
+            return this.problemPredictions
+        }
+
+        // We also save all headlines that are problematic for future use
+        const problematicHeadlines = []
+
+        const CHUNK_SIZE = 8
+        // Run predictions 8 at a time. (I think that makes sense wrt. CPU multithreading on the server)
+        for (let i = 0; i < tags.length; i += CHUNK_SIZE) {
+            const queries = tags.slice(i, i + CHUNK_SIZE)
+
+            const promises = queries.map(async (headline) => {
+                const req = await fetch("https://xt0r3-ai-hype-monitor.hf.space/run/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        data: [
+                            headline,
+                        ]
+                    })
+                });
+                const response = await req.json();
+                const predictionArray = response.data[0].confidences;
+                const predictions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                if (!!predictionArray) {
+                    let isProblematic = false;
+
+                    // This is done using for loops, because otherwise asynchronous accesses to predictions might cause
+                    // instances writing over each other.
+                    for (const predKey in predictionArray) {
+                        const prediction = predictionArray[predKey];
+                        try {
+                            const index = OrderEnum[prediction.label];
+                            predictions[index] = Math.max(predictions[index], prediction.confidence);
+                            if (predictions[index] > 0.5) {
+                                isProblematic = true;
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+
+                    if (isProblematic) {
+                        problematicHeadlines.push(headline);
+                        console.log("Problematic headline found: [" + headline + "]")
+                    }
+                }
+
+                for (let j = 0; j < predictions.length; j++) {
+                    this.problemPredictions[i] = Math.max(this.problemPredictions[i], predictions[i])
+                }
+
+                if (model == ModelEnum.Complex) {
+                    // If we are still on the AI model, update the overlay with the results we
+                    // have so far, but don't wait for it to complete before proceeding
+                    forceUpdateOverlay(this.problemPredictions)
+                }
+            });
+
+            await Promise.all(promises)
+        }
+
+        // This is just being logged in case anyone is interested.
+        // Future TODO out of scope of the current project: add it to interface
+        console.log("Problematic headlines:\n" + problematicHeadlines)
+
+        return this.problemPredictions
+
+    }
+
+
+}
+
+const ModelEnum = Object.freeze({
+    "Baseline": 0,
+    "Complex": 1,
+})
 
 const OrderEnum = Object.freeze({
     "agency": 0,
@@ -207,117 +308,40 @@ const links = [
 
 
 async function getProblematicArr() {
-    if (model == 0) {
-        if (!baseline_arr || testButton != null) {
+    if (model == ModelEnum.Baseline) {
+        if (!Baseline.problemPredictions || testButton != null) {
             // Tokenize all tags
             const tokens = Scraper.allTags.map(tag => tag.split(' ')).flat(1)
             // Run classifier
             console.log("Running baseline model on filtered tags\n" + JSON.stringify(Scraper.allTags, null, '\t'))
-            baseline_arr = await runClassifier(tokens)
+            Baseline.problemPredictions = await Baseline.runClassifier(tokens)
         }
-        return baseline_arr
+        return Baseline.problemPredictions
     } else {
-        if (!complex_arr || testButton != null) {
+        if (!Complex.problemPredictions || testButton != null) {
             console.log("Running complex model on filtered tags\n" + JSON.stringify(Scraper.headlineTags, null, '\t'))
-            complex_arr = await runClassifier(Scraper.headlineTags)
+            Complex.problemPredictions = await Complex.runClassifier(Scraper.headlineTags)
         }
-        return complex_arr
+        return Complex.problemPredictions
     }
 }
 
-async function runClassifier(tags) {
-    let result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+async function forceUpdateOverlay(arrayOverride) {
+    let arr = []
 
-    if (model == 0) { // Keyword Model
-        if (tags.length > 0) {
-            let baseline = Baseline.get();
-            result = Baseline.get().baseline(tags);
-        }
-    } else { // AI Model
-        if (tags.length > 0) {
-            // We also save all headlines that are problematic for future use
-            const problematicHeadlines = []
+    if (typeof arrayOverride === "undefined") {
+        // Some comments to keep the user posted about the query status
+        document.getElementById('title').innerHTML = "Processing website... This may take up to a minute."
+        document.getElementById('pitfalls-title').innerHTML = ""
+        document.getElementById('links-text').innerHTML = ""
+        document.getElementById('pitfalls-text').innerHTML = ""
+        document.getElementById('links-title').innerHTML = ""
 
-            // Only run the prediction on a random sample of 8 problematic headlines to allow for resources
-            // (I think that the server we are running the prediction on has 8 logical cores)
-            if (tags.length > 8) {
-                tags = tags.slice(0, 8)
-            }
-
-            const promises = tags.map((headline) => {
-                return fetch("https://xt0r3-ai-hype-monitor.hf.space/run/predict", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        data: [
-                            headline,
-                        ]
-                    })
-                }).then((response) => {
-                    return response.json()
-                }).then((response) => {
-                    const predictionArray = response.data[0].confidences;
-
-                    let predictions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-                    if (!!predictionArray) {
-                        let isProblematic = false
-
-                        // This is done using for loops, because otherwise asynchronous accesses to predictions might cause
-                        // instances writing over each other.
-                        for (const predKey in predictionArray) {
-                            const prediction = predictionArray[predKey]
-                            try {
-                                const index = OrderEnum[prediction.label]
-                                predictions[index] = Math.max(predictions[index], prediction.confidence);
-                                if (predictions[index] > 0.5) {
-                                    isProblematic = true
-                                }
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        }
-
-                        if (isProblematic) {
-                            problematicHeadlines.push(headline)
-                        }
-                    }
-
-                    return predictions
-                })
-            });
-
-            let resultsArray = await Promise.all(promises)
-
-            let maxResults = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-            for (let j = 0; j < resultsArray.length; j++) {
-                const headlineResult = resultsArray[j]
-                for (let i = 0; i < headlineResult.length; i++) {
-                    maxResults[i] = Math.max(maxResults[i], headlineResult[i])
-                }
-            }
-
-            result = maxResults
-
-            // This is just being logged in case anyone is interested.
-            // Future TODO out of scope of the current project: add it to interface
-            console.log("Problematic headlines:\n" + problematicHeadlines)
-        }
+        arr = await getProblematicArr()
+    } else {
+        arr = arrayOverride
     }
 
-    return result;
-}
-
-async function forceUpdateOverlay() {
-    // Some comments to keep the user posted about the query status
-    document.getElementById('title').innerHTML = "Processing website... This may take up to a minute."
-    document.getElementById('pitfalls-title').innerHTML = ""
-    document.getElementById('links-text').innerHTML = ""
-    document.getElementById('pitfalls-text').innerHTML = ""
-    document.getElementById('links-title').innerHTML = ""
-
-    const arr = await getProblematicArr()
     let problematic = false
     let filtered = [];
     for (let i = 0; i < arr.length; i++) {
@@ -330,10 +354,8 @@ async function forceUpdateOverlay() {
     if (problematic) {
         let txt = ""
         let suggestedLinks = []
-        console.log(filtered)
         for (let i = 0; i < filtered.length; i++) {
-            console.log(filtered[i])
-            txt += filtered[i][0][0] + (model == 1 ? "<p> Probability: " + filtered[i][1] + "%</p>" : "") + "</br></br>"
+            txt += filtered[i][0][0] + (model == ModelEnum.Complex ? "<p> Probability: " + filtered[i][1] + "%</p>" : "") + "</br></br>"
             for (let j = 1; j < filtered[i][0].length; j++) {
                 suggestedLinks.push(filtered[i][0][j])
             }

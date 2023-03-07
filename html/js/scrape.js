@@ -1,4 +1,12 @@
 /**
+ * Helper function for stripping the HTML tags from the scraped text
+ */
+export function clean(text) {
+  let doc = new DOMParser().parseFromString(text, 'text/html');
+  return doc.body.textContent.trim() || "";
+}
+
+/**
  * Returns a list of elements containing the tags within the `tags` list
  * @param {A list of tags we want to query from the page} tags 
  */
