@@ -111,7 +111,7 @@ class Scraper {
 
         if (!!testButton) {
             const text = document.getElementById("text-box").value;
-            if(!Keywords.test(text)){
+            if (!Keywords.test(text)) {
                 return
             }
             this.allTags.push(text)
@@ -231,7 +231,7 @@ async function runClassifier(tags) {
     if (model == 0) { // Keyword Model
         if (tags.length > 0) {
             let baseline = Baseline.get();
-            result = baseline.baseline(tags);
+            result = Baseline.get().baseline(tags);
         }
     } else { // AI Model
         if (tags.length > 0) {
@@ -310,6 +310,13 @@ async function runClassifier(tags) {
 }
 
 async function forceUpdateOverlay() {
+    // Some comments to keep the user posted about the query status
+    document.getElementById('title').innerHTML = "Processing website... This may take up to a minute."
+    document.getElementById('pitfalls-title').innerHTML = ""
+    document.getElementById('links-text').innerHTML = ""
+    document.getElementById('pitfalls-text').innerHTML = ""
+    document.getElementById('links-title').innerHTML = ""
+
     const arr = await getProblematicArr()
     let problematic = false
     let filtered = [];
@@ -322,18 +329,20 @@ async function forceUpdateOverlay() {
 
     if (problematic) {
         let txt = ""
-        let link = ""
+        let suggestedLinks = []
         console.log(filtered)
         for (let i = 0; i < filtered.length; i++) {
             console.log(filtered[i])
             txt += filtered[i][0][0] + (model == 1 ? "<p> Probability: " + filtered[i][1] + "%</p>" : "") + "</br></br>"
             for (let j = 1; j < filtered[i][0].length; j++) {
-                link += filtered[i][0][j] + "</br></br>"
+                suggestedLinks.push(filtered[i][0][j])
             }
         }
+        suggestedLinks = [... new Set(suggestedLinks)]  // make sure that every link is shown exactly once
+
         document.getElementById('title').innerHTML = "This page appears to contain problematic metaphors about AI! &#128064"
         document.getElementById('pitfalls-title').innerHTML = "&#10071 Pitfalls we think it contains"
-        document.getElementById('links-text').innerHTML = link
+        document.getElementById('links-text').innerHTML = suggestedLinks.join("</br></br>")
         document.getElementById('pitfalls-text').innerHTML = txt
         document.getElementById('links-title').innerHTML = "&#9989 Sources we recommend reading"
     } else {
@@ -348,7 +357,11 @@ async function forceUpdateOverlay() {
 chrome.storage.onChanged.addListener((changes, namespace) => {
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
         if (key == "model") {
-            model = newValue
+            if (model != newValue) {
+                // Change model and refresh the page
+                model = newValue
+                forceUpdateOverlay()
+            }
         } else if (key === "right") {
             card.style.right = newValue;
         } else if (key === "left") {
@@ -383,7 +396,7 @@ if (testButton != null) {
     }
     )
     testButton.addEventListener("click", async () => {
-        Scraper.init()
+        await Scraper.init()
         forceUpdateOverlay()
     });
 }
