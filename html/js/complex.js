@@ -1,5 +1,26 @@
 "use strict";
 
+const OrderEnum = Object.freeze({
+    "agency": 0,
+    "suggestiveImagery": 1,
+    "comparisonWithHumanIntelligence": 2,
+    "comparisonWithHumanSkills": 3,
+    "hyperbole": 4,
+    "uncriticalHistoryComparison": 5,
+    "unjustifiedClaimsAboutFuture": 6,
+    "falseClaimsAboutProgress": 7,
+    "incorrectClaimsAboutStudyReport": 8,
+    "deepSoundingTermsForBanalities": 9,
+    "treatingSpokespeopleAsNeutral": 10,
+    "repeatingPRTerms": 11,
+    "noDiscussionOfLimitations": 12,
+    "deEmphasizingLimitations": 13,
+    "limitationsAddressedBySkeptics": 14,
+    "downplayingHumanLabour": 15,
+    "performanceNumbersWithoutCaveats": 16,
+    "inscrutability": 17,
+})
+
 export async function startQuery(headlines, problemPredictions, problematicHeadlines) {
     if (headlines.length) {
         await processFirst(headlines, problemPredictions, problematicHeadlines)
