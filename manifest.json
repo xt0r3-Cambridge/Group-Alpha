@@ -32,6 +32,6 @@
     }
   ],
   "permissions": [
-    "tabs", "storage"
+    "storage"
   ]
 }
