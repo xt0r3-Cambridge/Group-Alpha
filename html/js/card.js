@@ -297,6 +297,7 @@ async function forceUpdateOverlay(arrayOverride) {
         arr = arrayOverride
     }
 
+    // filter out the problematic metaphors present - a metaphor is present if likelihood > 0.5 
     let problematic = false
     let filtered = [];
     for (let i = 0; i < arr.length; i++) {
@@ -305,10 +306,13 @@ async function forceUpdateOverlay(arrayOverride) {
             filtered.push([links[i], arr[i]])
         }
     }
-
+    
+    // only display popup if problematic metaphors found
     if (problematic) {
         let txt = ""
         let suggestedLinks = []
+        // for baseline model, add present pitfalls to txt and links to better resources to link.
+        // for AI model, also include the likelihood that the pitfall is present
         for (let i = 0; i < filtered.length; i++) {
             txt += filtered[i][0][0] + (model == ModelEnum.Complex ? "<p class='alpha-reset pitfalls-text'> Probability: " + filtered[i][1] + "%</p>" : "") + "<br><br>"
             for (let j = 1; j < filtered[i][0].length; j++) {
@@ -336,14 +340,17 @@ async function forceUpdateOverlay(arrayOverride) {
     }
 }
 
+// persistent storage for data we need to keep between page refreshes
 chrome.storage.onChanged.addListener((changes, namespace) => {
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+        // selected model
         if (key == "model") {
             if (model != newValue) {
                 // Change model and refresh the page
                 model = newValue
                 forceUpdateOverlay()
             }
+        // position of draggable card
         } else if (key === "right") {
             card.style.right = newValue;
         } else if (key === "left") {
@@ -358,10 +365,15 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     }
 });
 
+// test button only exists for the testing page
 let testButton = document.getElementById("test-button");
+
+// this means we're on the testing page
 if (testButton != null) {
+    // inject card popup
     fetch(chrome.runtime.getURL('/html/card.html')).then(r => r.text()).then(html => {
         document.body.insertAdjacentHTML('afterbegin', html);
+        // make the card collapsible - saves space
         document.getElementById("collapsible").addEventListener('click', function (e) {
             const content = document.getElementById("collapsible-content");
             if (content.style.display === "block") {
@@ -370,6 +382,7 @@ if (testButton != null) {
                 content.style.display = "block";
             }
         })
+        // after injecting the popup, update the text on it
     }).then(r => {
         chrome.storage.sync.get().then(items => {
             model = items.model
@@ -377,6 +390,8 @@ if (testButton != null) {
         })
     }
     )
+
+    // everytime the test button is clicked, the classifier is run with the new text
     testButton.addEventListener("click", async () => {
         await Scraper.init()
         forceUpdateOverlay()
