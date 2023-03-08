@@ -17,4 +17,4 @@ Upload it onto chrome extensions
 
 ``` Extensions -> Manage Extensions -> Turn on Developer Mode -> Load Unpacked -> Navigate to Group-Alpha -> Select ```
 
-Test the extension on wep pages with mentions of AI
+Test the extension on web pages with mentions of AI
