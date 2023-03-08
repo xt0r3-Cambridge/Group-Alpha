@@ -11,8 +11,6 @@ Clone the repository
 
 ```git clone https://github.com/xt0r3-Cambridge/Group-Alpha.git```
 
-```git checkout kornelRefactoring```
-
 Upload it onto chrome extensions
 
 ``` Extensions -> Manage Extensions -> Turn on Developer Mode -> Load Unpacked -> Navigate to Group-Alpha -> Select ```
