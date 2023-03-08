@@ -2,7 +2,6 @@
 
 let problematic = false
 let model = 0
-let baseline_arr
 let complex_arr
 let threshold = 0.700
 let card = null;
@@ -124,12 +123,12 @@ class Scraper {
         }
 
         // Filter for only headlines containing the keywords we need
-        this.headlineTags = await Keywords.filter([... new Set(this.scraper.getImportantLines())])
+        this.headlineTags = await Keywords.filter([... new Set(this.scraper.getImportantLines().map(line => Scraper.get().clean(line)))])
 
         // Doing filtering of articles in multiple steps,
         // as otherwise the process took too long and the site froze. 
         // Step 1: Get the lines beyond the headlines
-        const articleTagsNoLines = await Keywords.filter([...new Set(this.scraper.getTags(["p", "div"]))])
+        const articleTagsNoLines = await Keywords.filter([...new Set(this.scraper.getTags(["p", "div"]).map(tag => Scraper.get().clean(tag)))])
         // Step 2: Separate the lines
         const articleLines = await Keywords.filter(articleTagsNoLines.map(element => element.split('\n')).flat(1))
         // Step 3: Separate obvious sentences
@@ -142,6 +141,7 @@ class Scraper {
     static get = function () {
         return this.scraper
     }
+
 }
 
 /**
@@ -149,19 +149,82 @@ class Scraper {
  * static avoids the overhead of having to load it again at every call of getProblematicArr
  */
 class Baseline {
-    static baseline = null
+    static model = null
+    static problemPredictions = null
 
     static async init() {
-        if (this.baseline == null) {
-            this.baseline = await import("/html/js/baseline.js");
+        if (this.model == null) {
+            this.model = await import("/html/js/baseline.js");
         }
     }
 
     static get() {
-        return this.baseline
+        return this.model
+    }
+
+    static async runClassifier(tags) {
+        let result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        if (tags.length == 0) {
+            return result
+        }
+
+        result = this.model.baseline(tags);
+
+        return result
     }
 }
 
+/**
+ * Helper class to run the complex model
+ */
+class Complex {
+    static problemPredictions = null
+    static problematicHeadlines = []
+    static model = null
+
+    static async init() {
+        if (this.model == null) {
+            this.model = await import("/html/js/complex.js");
+        }
+
+        var addUpdateHook = function (arr) {
+            arr.pushWithUpdate = function (e) {
+                Array.prototype.push.call(arr, e);
+                forceUpdateOverlay(this.problemPredictions);
+            };
+        };
+        addUpdateHook(this.problematicHeadlines)
+    }
+
+    static async runClassifier(tags) {
+
+        // Set the problem predictions to non-null empty value and incrementally update it
+        this.problemPredictions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        if (tags.length == 0) {
+            return this.problemPredictions
+        }
+
+        // We also save all headlines that are problematic for future use
+        // Run the queries with at most 8 active queries at a time
+        const MAX_WORKERS = 8
+        for (let i = 0; i < MAX_WORKERS && tags.length; i++) {
+            this.model.startQuery(tags, this.problemPredictions, this.problematicHeadlines)
+        }
+
+        return this.problemPredictions
+    }
+
+    static get() {
+        return this.model
+    }
+}
+
+const ModelEnum = Object.freeze({
+    "Baseline": 0,
+    "Complex": 1,
+})
 
 const OrderEnum = Object.freeze({
     "agency": 0,
@@ -186,138 +249,55 @@ const OrderEnum = Object.freeze({
 
 
 const links = [
-    ["<p class='pitfalls-text'><b>Attributing agency to AI</b> - describing AI systems as taking actions independent of human supervision or implying that they may soon be able to do so. </p>", "<a class='links-text' href='https://www.aimyths.org/ai-has-agency'>Agency</a>"],
-    ["<p class='pitfalls-text'><b>Using suggestive imagery to portray AI as humanoid robots</b> - giving readers a false impression that AI tools are embodied, even when it is just software that learns patterns from data.</p>", "<a class='links-text' href='https://betterimagesofai.org/'>Imagery</a>"],
-    ["<p class='pitfalls-text'><b>Comparing AI with human intelligence</b> - implying that AI algorithms learn in the same way as humans do.</p>", "<a class='links-text' href='https://thenextweb.com/news/human-intelligence-and-ai-are-vastly-different-so-lets-stop-comparing-them'>Human Intelligence</a>"],
-    ["<p class='pitfalls-text'><b>Comparing AI capabilities with human skills</b> - falsely implying that AI tools and humans compete on an equal footing.</p>", "<a class='links-text' href='https://www.cs.princeton.edu/~sayashk/ai-hype/ai-reporting-pitfalls.pdf'>AI Pitfalls</a>"],
-    ["<p class='pitfalls-text'><b>Hyperbole</b> - describing AI systems as revolutionary or groundbreaking without concrete evidence of their performance.</p>", "<a class='links-text' href='https://www.aimyths.org/ai-can-solve-any-problem'>What problems can AI actually solve</a>"],
-    ["<p class='pitfalls-text'><b>Comparing AI tools with major historical transformations like the invention of electricity or the industrial revolution</b> - potentially conveying a false sense of progress if not backed by real-world evidence.</p>", "<a class='links-text' href='https://hdsr.mitpress.mit.edu/pub/wot7mkc1/release/9'>Historic Comparisons</a>"],
-    ["<p class='pitfalls-text'><b>Making unjustified claims about the future progress of AI. Without evidence, these claims are mere speculation, and can give a false impression about the state of AI developments.</p>", "<a class='links-text' href='https://www.fhi.ox.ac.uk/wp-content/uploads/FAIC.pdf'>Unjustified Claims</a>"],
-    ["<p class='pitfalls-text'><b>Making false claims about AI</b> - spreading misinformation and encouraging speculation.</p>", "<a class='links-text' href='https://www.fast.ai/posts/2017-09-19-accurate-info.html'>Credible Sources</a>"],
-    ["<p class='pitfalls-text'><b>Using sensational terms to describe banal actions</b> - hiding how mundane the tasks are.</p>", "<a class='links-text' href='https://medium.com/@emilymenonbender/on-nyt-magazine-on-ai-resist-the-urge-to-be-impressed-3d92fd9a0edd'>Sensational Terms</a>", "<a class='links-text' href='https://twitter.com/emilymbender/status/1571911804561035264?s=20&t=sEPBTiN2bd7qbeKJugjGIA'>Sensational Terms</a>"],
-    ["<p class='pitfalls-text'><b>Treating key stakeholders as neutral parties.</b> The article seems to contain mainly quotes from people who have a key interest in the success of AI, and may hence be a biased perspective.</p>", "<a class='links-text' href='https://amp.theguardian.com/commentisfree/2019/jan/13/dont-believe-the-hype-media-are-selling-us-an-ai-fantasy'>Treating Stakeholder as Neutral</a>"],
-    ["<p class='pitfalls-text'><b>Repeating PR statements, rather than actually describing the AI tool</b>, which can lead to misleading wording that misrepresents the actual capabilities of a tool.</p>", "<a class='links-text' href='https://theclick.news/churnalists-at-large/'>Repeating PR Statements</a>"],
-    ["<p class='pitfalls-text'><b>Not discussing the limitations of AI tools</b>, possibly resulting in a skewed view about the risks of AI.</p>", "<a class='links-text' href='https://hackernoon.com/the-missing-pieces-6-limitations-of-ai-s85r3upr'>The Limitations of AI</a>", "<a class='links-text' href='https://www.aimyths.org/ai-can-solve-any-problem'>What problems can AI actually solve</a>"],
-    ["<p class='pitfalls-text'><b>Downplaying to limitations of AI</b>, possibly resulting in a skewed view about the risks of AI.</p>", "<a class='links-text' href='https://hackernoon.com/the-missing-pieces-6-limitations-of-ai-s85r3upr'>The Limitations of AI</a>", "<a class='links-text' href='https://www.aimyths.org/ai-can-solve-any-problem'>What problems can AI actually solve</a>"],
-    ["<p class='pitfalls-text'><b>Addressing the limitations of AI from a 'skeptics' framing.</b></p>", "<a class='links-text' href='https://www.brookings.edu/research/a-guide-to-healthy-skepticism-of-artificial-intelligence-and-coronavirus/'>Why Healthy Skepticism about AI is Good</a>", "<a class='links-text' href='https://medium.com/@emilymenonbender/on-nyt-magazine-on-ai-resist-the-urge-to-be-impressed-3d92fd9a0edd#:~:text=On%20being%20placed%20into%20the%20%E2%80%9Cskeptics%E2%80%9D%20box'Skeptics Framing</a>"],
-    ["<p class='pitfalls-text'><b>Downplaying the human labour necessary to build AI systems.</b></p>", "<a class='links-text' href='https://www.noemamag.com/the-exploited-labor-behind-artificial-intelligence/'>Human Labour</a>"],
-    ["<p class='pitfalls-text'><b>Reporting performance numbers without uncertainty estimations or caveats.</b> There is seldom enough space in a news article to explain how performance numbers like accuracy are calculated, possibly misinforming readers, especially because AI tools are known to suffer performance degradations even under slight changes to datasets.</p>", "<a class='links-text'href='https://points.datasociety.net/uncertainty-edd5caf8981b'>AI Uncertainty</a>"],
-    ["<p class='pitfalls-text'><b>Describing AI as black boxes</b> - shifting accountability for AI tools from developers to the underlying technology, ignoring a lot of research on model interpretability and explainability.</p>", "<a class='links-text' href='https://royalsocietypublishing.org/doi/epdf/10.1098/rsta.2018.0084'>The Fallacy of Inscrutability</a>"]
+    ["<p class='alpha-reset pitfalls-text'><b>Attributing agency to AI</b> - describing AI systems as taking actions independent of human supervision or implying that they may soon be able to do so. </p>", "<a class='links-text' href='https://www.aimyths.org/ai-has-agency'>Agency</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Using suggestive imagery to portray AI as humanoid robots</b> - giving readers a false impression that AI tools are embodied, even when it is just software that learns patterns from data.</p>", "<a class='links-text' href='https://betterimagesofai.org/'>Imagery</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Comparing AI with human intelligence</b> - implying that AI algorithms learn in the same way as humans do.</p>", "<a class='links-text' href='https://thenextweb.com/news/human-intelligence-and-ai-are-vastly-different-so-lets-stop-comparing-them'>Human Intelligence</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Comparing AI capabilities with human skills</b> - falsely implying that AI tools and humans compete on an equal footing.</p>", "<a class='links-text' href='https://www.cs.princeton.edu/~sayashk/ai-hype/ai-reporting-pitfalls.pdf'>AI Pitfalls</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Hyperbole</b> - describing AI systems as revolutionary or groundbreaking without concrete evidence of their performance.</p>", "<a class='links-text' href='https://www.aimyths.org/ai-can-solve-any-problem'>What problems can AI actually solve</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Comparing AI tools with major historical transformations like the invention of electricity or the industrial revolution</b> - potentially conveying a false sense of progress if not backed by real-world evidence.</p>", "<a class='links-text' href='https://hdsr.mitpress.mit.edu/pub/wot7mkc1/release/9'>Historic Comparisons</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Making unjustified claims about the future progress of AI. Without evidence, these claims are mere speculation, and can give a false impression about the state of AI developments.</p>", "<a class='links-text' href='https://www.fhi.ox.ac.uk/wp-content/uploads/FAIC.pdf'>Unjustified Claims</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Making false claims about AI</b> - spreading misinformation and encouraging speculation.</p>", "<a class='links-text' href='https://www.fast.ai/posts/2017-09-19-accurate-info.html'>Credible Sources</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Using sensational terms to describe banal actions</b> - hiding how mundane the tasks are.</p>", "<a class='links-text' href='https://medium.com/@emilymenonbender/on-nyt-magazine-on-ai-resist-the-urge-to-be-impressed-3d92fd9a0edd'>Sensational Terms</a>", "<a class='links-text' href='https://twitter.com/emilymbender/status/1571911804561035264?s=20&t=sEPBTiN2bd7qbeKJugjGIA'>Sensational Terms</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Treating key stakeholders as neutral parties.</b> The article seems to contain mainly quotes from people who have a key interest in the success of AI, and may hence be a biased perspective.</p>", "<a class='links-text' href='https://amp.theguardian.com/commentisfree/2019/jan/13/dont-believe-the-hype-media-are-selling-us-an-ai-fantasy'>Treating Stakeholder as Neutral</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Repeating PR statements, rather than actually describing the AI tool</b>, which can lead to misleading wording that misrepresents the actual capabilities of a tool.</p>", "<a class='links-text' href='https://theclick.news/churnalists-at-large/'>Repeating PR Statements</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Not discussing the limitations of AI tools</b>, possibly resulting in a skewed view about the risks of AI.</p>", "<a class='links-text' href='https://hackernoon.com/the-missing-pieces-6-limitations-of-ai-s85r3upr'>The Limitations of AI</a>", "<a class='links-text' href='https://www.aimyths.org/ai-can-solve-any-problem'>What problems can AI actually solve</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Downplaying to limitations of AI</b>, possibly resulting in a skewed view about the risks of AI.</p>", "<a class='links-text' href='https://hackernoon.com/the-missing-pieces-6-limitations-of-ai-s85r3upr'>The Limitations of AI</a>", "<a class='links-text' href='https://www.aimyths.org/ai-can-solve-any-problem'>What problems can AI actually solve</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Addressing the limitations of AI from a 'skeptics' framing.</b></p>", "<a class='links-text' href='https://www.brookings.edu/research/a-guide-to-healthy-skepticism-of-artificial-intelligence-and-coronavirus/'>Why Healthy Skepticism about AI is Good</a>", "<a class='links-text' href='https://medium.com/@emilymenonbender/on-nyt-magazine-on-ai-resist-the-urge-to-be-impressed-3d92fd9a0edd#:~:text=On%20being%20placed%20into%20the%20%E2%80%9Cskeptics%E2%80%9D%20box'Skeptics Framing</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Downplaying the human labour necessary to build AI systems.</b></p>", "<a class='links-text' href='https://www.noemamag.com/the-exploited-labor-behind-artificial-intelligence/'>Human Labour</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Reporting performance numbers without uncertainty estimations or caveats.</b> There is seldom enough space in a news article to explain how performance numbers like accuracy are calculated, possibly misinforming readers, especially because AI tools are known to suffer performance degradations even under slight changes to datasets.</p>", "<a class='links-text'href='https://points.datasociety.net/uncertainty-edd5caf8981b'>AI Uncertainty</a>"],
+    ["<p class='alpha-reset pitfalls-text'><b>Describing AI as black boxes</b> - shifting accountability for AI tools from developers to the underlying technology, ignoring a lot of research on model interpretability and explainability.</p>", "<a class='links-text' href='https://royalsocietypublishing.org/doi/epdf/10.1098/rsta.2018.0084'>The Fallacy of Inscrutability</a>"]
 ]
 
 
 async function getProblematicArr() {
-    if (model == 0) {
-        if (!baseline_arr || testButton != null) {
+    if (model == ModelEnum.Baseline) {
+        if (!Baseline.problemPredictions || testButton != null) {
             // Tokenize all tags
             const tokens = Scraper.allTags.map(tag => tag.split(' ')).flat(1)
             // Run classifier
             console.log("Running baseline model on filtered tags\n" + JSON.stringify(Scraper.allTags, null, '\t'))
-            baseline_arr = await runClassifier(tokens)
+            Baseline.problemPredictions = await Baseline.runClassifier(tokens)
         }
-        return baseline_arr
+        return Baseline.problemPredictions
     } else {
-        if (!complex_arr || testButton != null) {
+        if (!Complex.problemPredictions || testButton != null) {
             console.log("Running complex model on filtered tags\n" + JSON.stringify(Scraper.headlineTags, null, '\t'))
-            complex_arr = await runClassifier(Scraper.headlineTags)
+            Complex.problemPredictions = await Complex.runClassifier(Scraper.headlineTags)
         }
-        return complex_arr
+        return Complex.problemPredictions
     }
 }
 
-async function runClassifier(tags) {
-    let result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+async function forceUpdateOverlay(arrayOverride) {
+    let arr = []
 
-    if (model == 0) { // Keyword Model
-        if (tags.length > 0) {
-            let baseline = Baseline.get();
-            result = Baseline.get().baseline(tags);
-        }
-    } else { // AI Model
-        if (tags.length > 0) {
-            // We also save all headlines that are problematic for future use
-            const problematicHeadlines = []
-
-            // Only run the prediction on a random sample of 8 problematic headlines to allow for resources
-            // (I think that the server we are running the prediction on has 8 logical cores)
-            if (tags.length > 8) {
-                tags = tags.slice(0, 8)
-            }
-
-            const promises = tags.map((headline) => {
-                return fetch("https://xt0r3-ai-hype-monitor.hf.space/run/predict", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        data: [
-                            headline,
-                        ]
-                    })
-                }).then((response) => {
-                    return response.json()
-                }).then((response) => {
-                    const predictionArray = response.data[0].confidences;
-
-                    let predictions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-                    if (!!predictionArray) {
-                        let isProblematic = false
-
-                        // This is done using for loops, because otherwise asynchronous accesses to predictions might cause
-                        // instances writing over each other.
-                        for (const predKey in predictionArray) {
-                            const prediction = predictionArray[predKey]
-                            try {
-                                const index = OrderEnum[prediction.label]
-                                predictions[index] = Math.max(predictions[index], prediction.confidence);
-                                if (predictions[index] > 0.5) {
-                                    isProblematic = true
-                                }
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        }
-
-                        if (isProblematic) {
-                            problematicHeadlines.push(headline)
-                        }
-                    }
-
-                    return predictions
-                })
-            });
-
-            let resultsArray = await Promise.all(promises)
-
-            let maxResults = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-            for (let j = 0; j < resultsArray.length; j++) {
-                const headlineResult = resultsArray[j]
-                for (let i = 0; i < headlineResult.length; i++) {
-                    maxResults[i] = Math.max(maxResults[i], headlineResult[i])
-                }
-            }
-
-            result = maxResults
-
-            // This is just being logged in case anyone is interested.
-            // Future TODO out of scope of the current project: add it to interface
-            console.log("Problematic headlines:\n" + problematicHeadlines)
-        }
+    if (typeof arrayOverride === "undefined") {
+        arr = await getProblematicArr()
+    } else {
+        arr = arrayOverride
     }
 
-    return result;
-}
-
-async function forceUpdateOverlay() {
-    // Some comments to keep the user posted about the query status
-    document.getElementById('title').innerHTML = "Processing website... This may take up to a minute."
-    document.getElementById('pitfalls-title').innerHTML = ""
-    document.getElementById('links-text').innerHTML = ""
-    document.getElementById('pitfalls-text').innerHTML = ""
-    document.getElementById('links-title').innerHTML = ""
-
-    const arr = await getProblematicArr()
+    // filter out the problematic metaphors present - a metaphor is present if likelihood > 0.5 
     let problematic = false
     let filtered = [];
     for (let i = 0; i < arr.length; i++) {
@@ -326,14 +306,15 @@ async function forceUpdateOverlay() {
             filtered.push([links[i], arr[i]])
         }
     }
-
+    
+    // only display popup if problematic metaphors found
     if (problematic) {
         let txt = ""
         let suggestedLinks = []
-        console.log(filtered)
+        // for baseline model, add present pitfalls to txt and links to better resources to link.
+        // for AI model, also include the likelihood that the pitfall is present
         for (let i = 0; i < filtered.length; i++) {
-            console.log(filtered[i])
-            txt += filtered[i][0][0] + (model == 1 ? "<p> Probability: " + filtered[i][1] + "%</p>" : "") + "</br></br>"
+            txt += filtered[i][0][0] + (model == ModelEnum.Complex ? "<p class='alpha-reset pitfalls-text'> Probability: " + filtered[i][1] + "%</p>" : "") + "<br><br>"
             for (let j = 1; j < filtered[i][0].length; j++) {
                 suggestedLinks.push(filtered[i][0][j])
             }
@@ -342,11 +323,16 @@ async function forceUpdateOverlay() {
 
         document.getElementById('title').innerHTML = "This page appears to contain problematic metaphors about AI! &#128064"
         document.getElementById('pitfalls-title').innerHTML = "&#10071 Pitfalls we think it contains"
-        document.getElementById('links-text').innerHTML = suggestedLinks.join("</br></br>")
+        document.getElementById('links-text').innerHTML = suggestedLinks.join("<br><br>")
         document.getElementById('pitfalls-text').innerHTML = txt
         document.getElementById('links-title').innerHTML = "&#9989 Sources we recommend reading"
     } else {
-        document.getElementById('title').innerHTML = "Nothing to report!"
+        if (model == ModelEnum.Baseline) {
+            document.getElementById('title').innerHTML = "Nothing to report!"
+        }
+        else {
+            document.getElementById('title').innerHTML = "Processing website... No issues found so far."
+        }
         document.getElementById('pitfalls-title').innerHTML = ""
         document.getElementById('links-text').innerHTML = ""
         document.getElementById('pitfalls-text').innerHTML = ""
@@ -354,14 +340,17 @@ async function forceUpdateOverlay() {
     }
 }
 
+// persistent storage for data we need to keep between page refreshes
 chrome.storage.onChanged.addListener((changes, namespace) => {
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+        // selected model
         if (key == "model") {
             if (model != newValue) {
                 // Change model and refresh the page
                 model = newValue
                 forceUpdateOverlay()
             }
+        // position of draggable card
         } else if (key === "right") {
             card.style.right = newValue;
         } else if (key === "left") {
@@ -376,10 +365,15 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     }
 });
 
+// test button only exists for the testing page
 let testButton = document.getElementById("test-button");
+
+// this means we're on the testing page
 if (testButton != null) {
+    // inject card popup
     fetch(chrome.runtime.getURL('/html/card.html')).then(r => r.text()).then(html => {
         document.body.insertAdjacentHTML('afterbegin', html);
+        // make the card collapsible - saves space
         document.getElementById("collapsible").addEventListener('click', function (e) {
             const content = document.getElementById("collapsible-content");
             if (content.style.display === "block") {
@@ -388,6 +382,7 @@ if (testButton != null) {
                 content.style.display = "block";
             }
         })
+        // after injecting the popup, update the text on it
     }).then(r => {
         chrome.storage.sync.get().then(items => {
             model = items.model
@@ -395,6 +390,8 @@ if (testButton != null) {
         })
     }
     )
+
+    // everytime the test button is clicked, the classifier is run with the new text
     testButton.addEventListener("click", async () => {
         await Scraper.init()
         forceUpdateOverlay()
@@ -407,6 +404,7 @@ Keywords.init()
         Promise.all([
             Scraper.init(),
             Baseline.init(),
+            Complex.init(),
         ])
     }).then(_ => {
         // Guardian pattern is nicer here, as we don't have an else block
